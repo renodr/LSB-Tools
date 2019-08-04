@@ -1,0 +1,459 @@
+#!/usr/bin/python3
+# Begin /usr/lib/lsb/install_initd
+
+import glob, itertools, os, re, sys
+from io import StringIO
+
+# Treat LSB headers just like RFC 2822 (email headers)
+# Derived from RFC822Parser from Debain initduitls.py
+class ParseHeaders(dict):
+  "A dictionary-like object."
+  __linere = re.compile(r'([^:]+):\s*(.*)$')
+
+  def __init__(self, fileob=None, strob=None, startcol=0, basedict=None):
+    if fileob is None and strob is None:
+      raise ValueError('need a file or string')
+    if not basedict:
+      basedict = {}
+
+    super(ParseHeaders, self).__init__(basedict)
+
+    if not fileob:
+      fileob = StringIO(strob)
+
+    key = None
+    for line in fileob:
+      if startcol:
+        line = line[startcol:]
+
+      if not line.strip():
+        continue
+
+      # Continuation line
+      if line[0].isspace():
+         if not key:
+           continue
+         self[key] += '\n' + line.strip()
+         continue
+
+      m = self.__linere.match(line)
+      if not m:
+        # Not a valid header
+        continue
+      key, value = m.groups()
+      self[key] = value.strip()
+
+# End of ParseHeaders
+
+beginre = re.compile(re.escape('### BEGIN INIT INFO'))
+endre = re.compile(re.escape('### END INIT INFO'))
+
+# Derrived from scan_intifile() from Debian initdutils.py
+def scan_headers(initfile):
+  headerlines = ''
+  scanning = False
+
+  for line in open(initfile):
+    line = line.rstrip()
+    if beginre.match(line):
+      scanning = True
+      continue
+    elif scanning and endre.match(line):
+      scanning = False
+      continue
+    elif not scanning:
+      continue
+
+    if line.startswith('# '):
+      headerlines += line[2:] + '\n'
+    elif line.startswith('#\t'):
+      headerlines += line[1:] + '\n'
+
+  inheaders = ParseHeaders(strob=headerlines)
+  headers = {}
+  for header, body in inheaders.items():
+    # Ignore empty headers
+    if not body.strip():
+      continue
+
+    if header in ('Provides',
+                  'Required-Start', 'Required-Stop',
+                  'Should-Start', 'Should-Stop',
+                  'Default-Start', 'Default-Stop'):
+      headers[header] = body.split()
+      if header == 'Provides':
+        for prov in headers[header]:
+          if prov != filename:
+            if debug == 1:
+              print("Adding", prov, ":", filename)
+            facilities[prov] = filename
+    else:
+      headers[header] = body
+
+  return headers
+  # End scan_headers()
+
+def find_index(listname, scriptname):
+  index = 0
+  if scriptname == "98":
+    return (len(listname) - 1)
+  if scriptname == "01":
+    return 0
+  while index < len(listname):
+    if listname[index][0] == scriptname:
+      return index
+    index += 1
+  # If we didn't find it, return a predictable number
+  return 1000
+  # End find_index()
+
+# Set debug
+debug = 0
+
+# Dictionary to map facilities to script names
+facilities = {
+  # special case for "$firs" and "$last" so that it's always first/last
+  # This is exclusively for *dm scripts and reboot/halt
+  "$last"      : "98",
+  "$first"     : "01",
+}
+
+# Create map for headers index numbers used in "sysinit" and "matrix" lists
+hindex = {
+  "name"            : 0,
+  "provides"        : 1,
+  "required-start"  : 2,
+  "required-stop"   : 3,
+  "should-start"    : 4,
+  "should-stop"     : 5,
+  "start-runlevels" : 6,
+  "stop-runlevels"  : 7,
+}
+
+# Find init.d directory
+if os.path.exists("/etc/init.d"):
+  if os.path.islink("/etc/init.d"):
+      initdDir = os.path.realpath("/etc/init.d")
+  else:
+    initdDir = "/etc/init.d"
+elif os.path.exists("/etc/rc.d./init.d"):
+  initdDir = "/etc/rc.d/init.d"
+else:
+  print("Unable to locate init.d directory! Exiting...", file=sys.stderr)
+  sys.exit(2)
+
+# Find rc base directory
+if os.path.exists("/etc/rc.d"):
+  if os.path.islink("/etc/rc.d"):
+    rcdDir = os.path.realpath("/etc/rc.d")
+  else:
+    rcdDir = "/etc/rc.d"
+else:
+  print("Unable to locate rc.d directory! Exiting...", file=sys.stderr)
+  sys.exit(3)
+
+# Process command line arguments
+for opt in sys.argv:
+  if opt == '-h' or opt == '--help':
+    print("Usage:",sys.argv[0], os.path.join(initdDir,"<init-script>"), "[-v|--verbose] [-h|--help")
+    sys.exit(0)
+  elif opt == '-v' or opt == '--verbose':
+    debug = 1
+  elif re.search("^-", opt):
+    badopt = "'" + opt + "'!"
+    print("Error: invalid argument", badopt, "Exiting...", file=sys.stderr)
+    sys.exit(1)
+  else:
+    initfile = opt
+    ap = os.path.abspath(initfile)
+    if os.path.exists(ap):
+      initfile = ap
+    else:
+      initfile = os.path.join(initdDir, initfile)
+
+if not os.path.exists(initfile):
+  print("Error:", initfile, "does not exist! Exiting...", file=sys.stderr)
+  print("Usage:",sys.argv[0], os.path.join(initdDir,"<init-script>"), "[-v|--verbose] [-h|--help", file=sys.stderr)
+  sys.exit(1)
+
+# Now, pull in all scripts and depdendencies in initdDir into lists
+matrix = []
+sysinit = []
+slist = []
+for filename in os.listdir(initdDir):
+  headers = scan_headers(os.path.join(initdDir, filename))
+  provides = headers.get('Provides', [])
+  reqstart = headers.get('Required-Start', [])
+  reqstop = headers.get('Required-Stop', [])
+  shouldstart = headers.get('Should-Start', [])
+  shouldstop = headers.get('Should-Stop', [])
+  defstart = headers.get('Default-Start', [])
+  defstop = headers.get('Default-Stop', [])
+
+  if filename != "template" and filename != "rc":
+    if len(defstart) > 0 and defstart[0] == "S" or len(defstart) > 0 and defstart[0] == "sysinit":
+      # sysinit is a special case, we only use initdDir/../rcS.d and only
+      # add here if already enabled (or it's the soon to be enable script)
+      # We'll do the same for the rest when we build the lists for each RL
+      strLink = 'S??' + filename
+      fn = os.path.join(rcdDir, "rcS.d", strLink)
+      if glob.glob(fn) or filename == initfile:
+        sysinit.append([filename, provides, reqstart, reqstop, shouldstart, shouldstop, defstart, defstop,])
+        slist.append([filename])
+    else:
+      matrix.append([filename, provides, reqstart, reqstop, shouldstart, shouldstop, defstart, defstop,])
+
+# Convert facilities that do not match script name to use script name
+for s in itertools.chain(sysinit, matrix):
+  for key in facilities.keys():
+    for x in {hindex["provides"], hindex["required-start"], hindex["required-stop"], hindex["should-start"], hindex["should-stop"]}:
+      for i in range(len(s[x])):
+        s[x][i] = s[x][i].replace(key, facilities[key])
+
+# Create a dictionary for each runlevel that lists start scripts as well
+# as a separate one that contains only the names (as was done for sysinit)
+# Do start runlevels first
+
+startlist = {}
+startdict = {}
+stoplist = {}
+stopdict = {}
+
+for runlevel in {0,1,2,3,4,5,6}:
+  strll = []
+  strld = []
+  sprll = []
+  sprld = []
+
+  rcrldir = 'rc' + str(runlevel) + '.d'
+  for s in itertools.chain(sysinit, matrix):
+    for rl in s[hindex["start-runlevels"]]:
+      if rl == str(runlevel):
+        strLink = 'S??' + s[hindex["name"]]
+        fn = os.path.join(rcdDir, rcrldir, strLink)
+        if glob.glob(fn) or s[hindex["name"]] == initfile:
+          strll.append(s[hindex["name"]])
+          strld.append(s)
+    for rl in s[hindex["stop-runlevels"]]:
+      if rl == str(runlevel):
+        strLink = 'K??' + s[hindex["name"]]
+        fn = os.path.join(rcdDir, rcrldir, strLink)
+        if glob.glob(fn) or s[hindex["name"]] == initfile:
+          sprll.append(s[hindex["name"]])
+          sprld.append(s)
+  startlist[str(runlevel)] = strll
+  startdict[str(runlevel)] = strld
+  stoplist[str(runlevel)] = sprll
+  stopdict[str(runlevel)] = sprld
+
+# Order sysinit
+nomoves = 0
+if debug == 1:
+  print("Organizing sysinit start scripts...")
+while nomoves == 0:
+  nomoves = 0
+  index = 0
+  moves = 0
+  while index < len(slist):
+    curindex = find_index(sysinit, slist[index][hindex["name"]])
+    newindex = curindex
+    indexsub = 0
+    while indexsub < len(sysinit[curindex][hindex["required-start"]]):
+      tempindex = find_index(sysinit, sysinit[curindex][hindex["required-start"]][indexsub])
+      if tempindex == 1000:
+        print("Error! Unable to locate requried dependency", sysinit[curindex][hindex["required-start"]][indexsub], "for script:", slist[index][hindex["name"]], file=sys.stderr)
+        sys.exit(2)
+      if tempindex > newindex:
+        newindex = tempindex
+      indexsub += 1
+    indexsub = 0
+    while indexsub < len(sysinit[curindex][hindex["should-start"]]):
+      tempindex = find_index(sysinit, sysinit[curindex][hindex["should-start"]][indexsub])
+      if tempindex != 1000 and tempindex > newindex:
+        newindex = tempindex
+      indexsub += 1
+    if newindex != curindex:
+      # Remove it and then put it back in proper order
+      if debug == 1:
+        print("Moving", slist[index][hindex["name"]], "to after", sysinit[newindex][hindex["name"]])
+      scriptvals = sysinit.pop(curindex)
+      sysinit.insert(newindex, scriptvals)
+      moves += 1
+    index += 1
+  if moves == 0:
+    nomoves = 1
+
+# Reorder start lists (only for RLs 1-5) exactly like above
+for runlevel in {1,2,3,4,5}:
+  nomoves = 0
+  if debug == 1:
+    print("Organizing runlevel", str(runlevel), "start scripts...")
+  while nomoves == 0:
+    nomoves = 0
+    index = 0
+    moves = 0
+    while index < len(startlist[str(runlevel)]):
+      curindex = find_index(startdict[str(runlevel)], startlist[str(runlevel)][index])
+      newindex = curindex
+      indexsub = 0
+      while indexsub < len(startdict[str(runlevel)][curindex][hindex["required-start"]]):
+        tempindex = find_index(startdict[str(runlevel)], startdict[str(runlevel)][curindex][hindex["required-start"]][indexsub])
+        if tempindex == 1000:
+          # See if we are not in slist[]
+          slerror = 1
+          for sl in slist:
+            if startdict[str(runlevel)][curindex][hindex["required-start"]][indexsub] == sl[hindex["name"]]:
+              # It's in sysinit, so just ignore it.
+              slerror = 0
+          if slerror == 1:
+            print("Error! Unable to locate requried dependency", startdict[str(runlevel)][curindex][hindex["required-start"]][indexsub], "for script:", startlist[str(runlevel)][index], file=sys.stderr)
+            sys.exit(2)
+        if tempindex > newindex and tempindex != 1000:
+          newindex = tempindex
+        indexsub += 1
+      indexsub = 0
+      while indexsub < len(startdict[str(runlevel)][curindex][hindex["should-start"]]):
+        tempindex = find_index(startdict[str(runlevel)], startdict[str(runlevel)][curindex][hindex["should-start"]][indexsub])
+        if tempindex != 1000 and tempindex > newindex:
+          newindex = tempindex
+        indexsub += 1
+      if newindex != curindex and newindex != 1000:
+        # Remove it and then put it back in proper order
+        if debug == 1:
+          print("Moving", startlist[str(runlevel)][index], "to after", startdict[str(runlevel)][newindex][hindex["name"]])
+        scriptvals = startdict[str(runlevel)].pop(curindex)
+        startdict[str(runlevel)].insert(newindex, scriptvals)
+        moves += 1
+      index += 1
+    if moves == 0:
+      nomoves = 1
+
+# Stop scripts are reversed
+for runlevel in {0,1,2,3,4,5,6}:
+  nomoves = 0
+  if debug == 1:
+    print("Organizing runlevel", str(runlevel), "stop scripts...")
+  while nomoves == 0:
+    nomoves = 0
+    index = 0
+    moves = 0
+    while index < len(stoplist[str(runlevel)]):
+      curindex = find_index(stopdict[str(runlevel)], stoplist[str(runlevel)][index])
+      newindex = curindex
+      indexsub = 0
+      while indexsub < len(stopdict[str(runlevel)][curindex][hindex["required-stop"]]):
+        tempindex = find_index(stopdict[str(runlevel)], stopdict[str(runlevel)][curindex][hindex["required-stop"]][indexsub])
+        if tempindex == 1000:
+          # See if we are not in slist[]
+          slerror = 1
+          for sl in slist:
+            if stopdict[str(runlevel)][curindex][hindex["required-stop"]][indexsub] == sl[hindex["name"]]:
+              # It's in sysinit, so just ignore it.
+              slerror = 0
+          if slerror == 1:
+            print("Error! Unable to locate requried dependency", stopdict[str(runlevel)][curindex][hindex["required-stop"]][indexsub], "for script:", stoplist[str(runlevel)][index], file=sys.stderr)
+            sys.exit(2)
+        if tempindex < newindex and tempindex != 1000:
+          newindex = tempindex
+        indexsub += 1
+      indexsub = 0
+      while indexsub < len(stopdict[str(runlevel)][curindex][hindex["should-stop"]]):
+        tempindex = find_index(stopdict[str(runlevel)], stopdict[str(runlevel)][curindex][hindex["should-stop"]][indexsub])
+        if tempindex != 1000 and tempindex < newindex:
+          newindex = tempindex
+        indexsub += 1
+      if newindex != curindex and newindex != 1000:
+        # Remove it and then put it back in proper order
+        if debug == 1:
+          print("Moving", stoplist[str(runlevel)][index], "to before", stopdict[str(runlevel)][newindex][hindex["name"]])
+        scriptvals = stopdict[str(runlevel)].pop(curindex)
+        stopdict[str(runlevel)].insert((newindex), scriptvals)
+        moves += 1
+      index += 1
+    if moves == 0:
+      nomoves = 1
+
+
+# For scripts we manage, remove existing symlinks and create new for sysinit
+rldir = os.path.join(rcdDir, "rcS.d")
+for s in sysinit:
+  sname = s[hindex["name"]]
+  gname = "S??" + sname
+  spath = os.path.join(rldir, gname)
+  lpath = glob.glob(spath)[0]
+  if os.path.exists(lpath):
+    if debug == 1:
+      print("Removing", lpath)
+    os.remove(lpath)
+increment = 100 // len(sysinit)
+sid = 0
+for s in sysinit:
+  sname = s[hindex["name"]]
+  target = os.path.join("../init.d", sname)
+  if sid < 10:
+    strsid = "0" + str(sid)
+  else:
+    strsid = str(sid)
+  gname = "S" + strsid + sname
+  spath = os.path.join(rldir, gname)
+  if debug == 1:
+    print("Adding", spath)
+  os.symlink(target, spath)
+  sid += increment
+
+# For the runlevels....
+for runlevel in {0,1,2,3,4,5,6}:
+  rltdir = "rc" + str(runlevel) + ".d"
+  rldir = os.path.join(rcdDir, rltdir)
+  for s in startdict[str(runlevel)]:
+    sname = s[hindex["name"]]
+    gname = "S??" + sname
+    spath = os.path.join(rldir, gname)
+    if glob.glob(spath):
+      if debug == 1:
+        print("Removing", glob.glob(spath)[0])
+      os.remove(glob.glob(spath)[0])
+  if len(startdict[str(runlevel)]) > 0:
+    increment = 100 // len(startdict[str(runlevel)])
+  else:
+    increment = 99
+  sid = 0
+  for s in startdict[str(runlevel)]:
+    sname = s[hindex["name"]]
+    target = os.path.join("../init.d", sname)
+    if sid < 10:
+      strsid = "0" + str(sid)
+    else:
+      strsid = str(sid)
+    gname = "S" + strsid + sname
+    spath = os.path.join(rldir, gname)
+    if debug == 1:
+      print("Adding", spath)
+    os.symlink(target, spath)
+    sid += increment
+  for s in stopdict[str(runlevel)]:
+    sname = s[hindex["name"]]
+    gname = "K??" + sname
+    spath = os.path.join(rldir, gname)
+    if glob.glob(spath):
+      if debug == 1:
+        print("Removing", glob.glob(spath)[0])
+      os.remove(glob.glob(spath)[0])
+  if len(stopdict[str(runlevel)]) > 0:
+    increment = 100 // len(stopdict[str(runlevel)])
+  else:
+    increment = 99
+  sid = 0
+  for s in stopdict[str(runlevel)]:
+    sname = s[hindex["name"]]
+    if sid < 10:
+      strsid = "0" + str(sid)
+    else:
+      strsid = str(sid)
+    gname = "K" + strsid + sname
+    spath = os.path.join(rldir, gname)
+    target = os.path.join("../init.d", sname)
+    if debug == 1:
+      print("Adding", spath)
+    os.symlink(target, spath)
+    sid += increment
