@@ -68,6 +68,12 @@ for s in matrix:
         print("Adding", prov, ":", filename)
       facilities[prov] = s[hindex["name"]]
 
+# Convert facilities that do not match script name to use script name
+for s in matrix:
+  for key in facilities.keys():
+    for x in {hindex["provides"], hindex["required-start"], hindex["required-stop"], hindex["should-start"], hindex["should-stop"]}:
+      for i in range(len(s[x])):
+        s[x][i] = s[x][i].replace(key, facilities[key])
 
 # sysinit is a special case as it's independent of the others
 sysinit = []
@@ -80,22 +86,6 @@ for s in matrix:
       sysinit.append(s)
       slist.append(s[hindex["name"]])
 
-print("sysinit contains:")
-for s in sysinit:
-  print(s)
-
-print("slist contains:")
-for s in slist:
-  print(s)
-
-# Convert facilities that do not match script name to use script name
-for s in matrix:
-  for key in facilities.keys():
-    for x in {hindex["provides"], hindex["required-start"], hindex["required-stop"], hindex["should-start"], hindex["should-stop"]}:
-      for i in range(len(s[x])):
-        s[x][i] = s[x][i].replace(key, facilities[key])
-
-print(facilities)
 # Create a dictionary for each runlevel that lists start scripts as well
 # as a separate one that contains only the names (as was done for sysinit)
 # Do start runlevels first
@@ -141,13 +131,13 @@ while nomoves == 0:
   index = 0
   moves = 0
   while index < len(slist):
-    curindex = lsbinitd.find_index(sysinit, slist[index][hindex["name"]])
+    curindex = lsbinitd.find_index(sysinit, slist[index])
     newindex = curindex
     indexsub = 0
     while indexsub < len(sysinit[curindex][hindex["required-start"]]):
       tempindex = lsbinitd.find_index(sysinit, sysinit[curindex][hindex["required-start"]][indexsub])
       if tempindex == 1000:
-        print("Error! Unable to locate requried dependency", sysinit[curindex][hindex["required-start"]][indexsub], "for script:", slist[index][hindex["name"]], file=sys.stderr)
+        print("Error! Unable to locate requried dependency", sysinit[curindex][hindex["required-start"]][indexsub], "for script:", slist[index], file=sys.stderr)
         sys.exit(2)
       if tempindex > newindex:
         newindex = tempindex
@@ -188,11 +178,11 @@ for runlevel in {1,2,3,4,5}:
           # See if we are not in slist[]
           slerror = 1
           for sl in slist:
-            if startdict[str(runlevel)][curindex][hindex["required-start"]][indexsub] == sl[hindex["name"]]:
+            if startdict[str(runlevel)][curindex][hindex["required-start"]][indexsub] == sl:
               # It's in sysinit, so just ignore it.
               slerror = 0
           if slerror == 1:
-            print("Error! Unable to locate requried dependency", startdict[str(runlevel)][curindex][hindex["required-start"]][indexsub], "for script:", startlist[str(runlevel)][index], file=sys.stderr)
+            print("Error! Unable to locate Requried-Start dependency", startdict[str(runlevel)][curindex][hindex["required-start"]][indexsub], "for script:", startlist[str(runlevel)][index], file=sys.stderr)
             sys.exit(2)
         if tempindex > newindex and tempindex != 1000:
           newindex = tempindex
@@ -233,11 +223,11 @@ for runlevel in {0,1,2,3,4,5,6}:
           # See if we are not in slist[]
           slerror = 1
           for sl in slist:
-            if stopdict[str(runlevel)][curindex][hindex["required-stop"]][indexsub] == sl[hindex["name"]]:
+            if stopdict[str(runlevel)][curindex][hindex["required-stop"]][indexsub] == sl:
               # It's in sysinit, so just ignore it.
               slerror = 0
           if slerror == 1:
-            print("Error! Unable to locate requried dependency", stopdict[str(runlevel)][curindex][hindex["required-stop"]][indexsub], "for script:", stoplist[str(runlevel)][index], file=sys.stderr)
+            print("Error! Unable to locate Requried-Stop dependency", stopdict[str(runlevel)][curindex][hindex["required-stop"]][indexsub], "for script:", stoplist[str(runlevel)][index], file=sys.stderr)
             sys.exit(2)
         if tempindex < newindex and tempindex != 1000:
           newindex = tempindex
@@ -270,9 +260,7 @@ for s in sysinit:
   if os.path.exists(lpath):
     if debug == 1:
       print("Removing", lpath)
-    ## FIXME
-    #os.remove(lpath)
-    print("Removing:", lpath)
+    os.remove(lpath)
 increment = 100 // len(sysinit)
 sid = 0
 for s in sysinit:
@@ -286,9 +274,7 @@ for s in sysinit:
   spath = os.path.join(rldir, gname)
   if debug == 1:
     print("Adding", spath)
-  ## FIXME
-  #os.symlink(target, spath)
-  print("Creating:", spath, "->", target)
+  os.symlink(target, spath)
   sid += increment
 
 # For the runlevels....
@@ -302,9 +288,7 @@ for runlevel in {0,1,2,3,4,5,6}:
     if glob.glob(spath):
       if debug == 1:
         print("Removing", glob.glob(spath)[0])
-      ## FIXME
-      #os.remove(glob.glob(spath)[0])
-      print("Removing:", glob.glob(spath)[0])
+      os.remove(glob.glob(spath)[0])
   if len(startdict[str(runlevel)]) > 0:
     increment = 100 // len(startdict[str(runlevel)])
   else:
@@ -321,9 +305,7 @@ for runlevel in {0,1,2,3,4,5,6}:
     spath = os.path.join(rldir, gname)
     if debug == 1:
       print("Adding", spath)
-    ## FIXME
-    #os.symlink(target, spath)
-    print("Creating:", spath, "->", target)
+    os.symlink(target, spath)
     sid += increment
   for s in stopdict[str(runlevel)]:
     sname = s[hindex["name"]]
@@ -332,9 +314,7 @@ for runlevel in {0,1,2,3,4,5,6}:
     if glob.glob(spath):
       if debug == 1:
         print("Removing", glob.glob(spath)[0])
-      ## FIXME
-      #os.remove(glob.glob(spath)[0])
-      print("Removing:", glob.glob(spath)[0])
+      os.remove(glob.glob(spath)[0])
   if len(stopdict[str(runlevel)]) > 0:
     increment = 100 // len(stopdict[str(runlevel)])
   else:
@@ -351,7 +331,5 @@ for runlevel in {0,1,2,3,4,5,6}:
     target = os.path.join("../init.d", sname)
     if debug == 1:
       print("Adding", spath)
-    ## FIXME
-    #os.symlink(target, spath)
-    print("Creating:", spath, "->", target)
+    os.symlink(target, spath)
     sid += increment
