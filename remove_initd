@@ -1,111 +1,8 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 # Begin /usr/lib/lsb/install_initd
 
-import glob, itertools, os, re, sys
+import glob, itertools, lsbinitd, os, re, sys
 from io import StringIO
-
-# Treat LSB headers just like RFC 2822 (email headers)
-# Derived from RFC822Parser from Debain initduitls.py
-class ParseHeaders(dict):
-  "A dictionary-like object."
-  __linere = re.compile(r'([^:]+):\s*(.*)$')
-
-  def __init__(self, fileob=None, strob=None, startcol=0, basedict=None):
-    if fileob is None and strob is None:
-      raise ValueError('need a file or string')
-    if not basedict:
-      basedict = {}
-
-    super(ParseHeaders, self).__init__(basedict)
-
-    if not fileob:
-      fileob = StringIO(strob)
-
-    key = None
-    for line in fileob:
-      if startcol:
-        line = line[startcol:]
-
-      if not line.strip():
-        continue
-
-      # Continuation line
-      if line[0].isspace():
-         if not key:
-           continue
-         self[key] += '\n' + line.strip()
-         continue
-
-      m = self.__linere.match(line)
-      if not m:
-        # Not a valid header
-        continue
-      key, value = m.groups()
-      self[key] = value.strip()
-
-# End of ParseHeaders
-
-beginre = re.compile(re.escape('### BEGIN INIT INFO'))
-endre = re.compile(re.escape('### END INIT INFO'))
-
-# Derrived from scan_intifile() from Debian initdutils.py
-def scan_headers(initfile):
-  headerlines = ''
-  scanning = False
-
-  for line in open(initfile):
-    line = line.rstrip()
-    if beginre.match(line):
-      scanning = True
-      continue
-    elif scanning and endre.match(line):
-      scanning = False
-      continue
-    elif not scanning:
-      continue
-
-    if line.startswith('# '):
-      headerlines += line[2:] + '\n'
-    elif line.startswith('#\t'):
-      headerlines += line[1:] + '\n'
-
-  inheaders = ParseHeaders(strob=headerlines)
-  headers = {}
-  for header, body in inheaders.items():
-    # Ignore empty headers
-    if not body.strip():
-      continue
-
-    if header in ('Provides',
-                  'Required-Start', 'Required-Stop',
-                  'Should-Start', 'Should-Stop',
-                  'Default-Start', 'Default-Stop'):
-      headers[header] = body.split()
-      if header == 'Provides':
-        for prov in headers[header]:
-          if prov != filename:
-            if debug == 1:
-              print("Adding", prov, ":", filename)
-            facilities[prov] = filename
-    else:
-      headers[header] = body
-
-  return headers
-  # End scan_headers()
-
-def find_index(listname, scriptname):
-  index = 0
-  if scriptname == "98":
-    return (len(listname) - 1)
-  if scriptname == "01":
-    return 0
-  while index < len(listname):
-    if listname[index][0] == scriptname:
-      return index
-    index += 1
-  # If we didn't find it, return a predictable number
-  return 1000
-  # End find_index()
 
 # Set debug
 debug = 0
@@ -131,26 +28,10 @@ hindex = {
 }
 
 # Find init.d directory
-if os.path.exists("/etc/init.d"):
-  if os.path.islink("/etc/init.d"):
-      initdDir = os.path.realpath("/etc/init.d")
-  else:
-    initdDir = "/etc/init.d"
-elif os.path.exists("/etc/rc.d./init.d"):
-  initdDir = "/etc/rc.d/init.d"
-else:
-  print("Unable to locate init.d directory! Exiting...", file=sys.stderr)
-  sys.exit(2)
+initdDir = lsbinitd.find_initd_dir()
 
 # Find rc base directory
-if os.path.exists("/etc/rc.d"):
-  if os.path.islink("/etc/rc.d"):
-    rcdDir = os.path.realpath("/etc/rc.d")
-  else:
-    rcdDir = "/etc/rc.d"
-else:
-  print("Unable to locate rc.d directory! Exiting...", file=sys.stderr)
-  sys.exit(3)
+rcdDir = lsbinitd.find_rc_base_dir()
 
 # Process command line arguments
 for opt in sys.argv:
@@ -177,42 +58,22 @@ if not os.path.exists(initfile):
   sys.exit(1)
 
 # Now, pull in all scripts and depdendencies in initdDir into lists
-matrix = []
-sysinit = []
-slist = []
-for filename in os.listdir(initdDir):
-  headers = scan_headers(os.path.join(initdDir, filename))
-  provides = headers.get('Provides', [])
-  reqstart = headers.get('Required-Start', [])
-  reqstop = headers.get('Required-Stop', [])
-  shouldstart = headers.get('Should-Start', [])
-  shouldstop = headers.get('Should-Stop', [])
-  defstart = headers.get('Default-Start', [])
-  defstop = headers.get('Default-Stop', [])
+matrix = lsbinitd.get_matrix(initdDir, debug)
 
-  if filename != "template" and filename != "rc":
-    if len(defstart) > 0 and defstart[0] == "S" or len(defstart) > 0 and defstart[0] == "sysinit":
-      # sysinit is a special case, we only use initdDir/../rcS.d and only
-      # add here if already enabled (or it's the soon to be enable script)
-      # We'll do the same for the rest when we build the lists for each RL
-      strLink = 'S??' + filename
-      fn = os.path.join(rcdDir, "rcS.d", strLink)
-      if glob.glob(fn) or filename == initfile:
-        sysinit.append([filename, provides, reqstart, reqstop, shouldstart, shouldstop, defstart, defstop,])
-        slist.append([filename])
-        matrix.append([filename, provides, reqstart, reqstop, shouldstart, shouldstop, defstart, defstop,])
-    else:
-      matrix.append([filename, provides, reqstart, reqstop, shouldstart, shouldstop, defstart, defstop,])
+# Update facilites -> script names
+for s in matrix:
+  for prov in s[hindex["provides"]]:
+    if prov != s[hindex["name"]]:
+      if debug == 1:
+        print("Adding", prov, ":", s[hindex["name"]])
+      facilities[prov] = s[hindex["name"]]
 
 # Convert facilities that do not match script name to use script name
-for s in itertools.chain(sysinit, matrix):
+for s in matrix:
   for key in facilities.keys():
     for x in {hindex["provides"], hindex["required-start"], hindex["required-stop"], hindex["should-start"], hindex["should-stop"]}:
       for i in range(len(s[x])):
         s[x][i] = s[x][i].replace(key, facilities[key])
-
-#### THIS IS WHERE WE DIFFER FROM "insatll_initd"
-#### EVERYTHING ABOVE SHOULD BE STUFFED AWAY IN FUNCTIONS AND INCLUDED
 
 # Find what runlevels initfile is set to start and stop in
 # First make sure it's installed adn then enabled
@@ -221,7 +82,7 @@ if not os.path.exists(initfile):
   sys.exit(1)
 
 # Find it in the matrix and see what runlevels it starts in
-tindex = find_index(matrix, os.path.basename(initfile))
+tindex = lsbinitd.find_index(matrix, os.path.basename(initfile))
 stlvls = matrix[tindex][hindex["start-runlevels"]]
 splvls = matrix[tindex][hindex["stop-runlevels"]]
 
@@ -281,12 +142,14 @@ for runlevel in matrix[tindex][hindex["start-runlevels"]]:
   linkdir = "rc" + runlevel + ".d"
   linkpath = os.path.join(rcdDir, linkdir, link)
   if glob.glob(linkpath):
-    print("Removing link:", glob.glob(linkpath)[0])
+    if debug == 1:
+      print("Removing link:", glob.glob(linkpath)[0])
     os.remove(glob.glob(linkpath)[0])
 for runlevel in matrix[tindex][hindex["stop-runlevels"]]:
   link = "K??" + matrix[tindex][hindex["name"]]
   linkdir = "rc" + runlevel + ".d"
   linkpath = os.path.join(rcdDir, linkdir, link)
   if glob.glob(linkpath):
-    print("Removing link:", glob.glob(linkpath)[0])
+    if debug == 1:
+      print("Removing link:", glob.glob(linkpath)[0])
     os.remove(glob.glob(linkpath)[0])
