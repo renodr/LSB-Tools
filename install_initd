@@ -65,7 +65,7 @@ for s in matrix:
   for prov in s[hindex["provides"]]:
     if prov != s[hindex["name"]]:
       if debug == 1:
-        print("Adding", prov, ":", filename)
+        print("Adding", prov, ":", s[hindex["name"]])
       facilities[prov] = s[hindex["name"]]
 
 # Convert facilities that do not match script name to use script name
@@ -137,7 +137,7 @@ while nomoves == 0:
     while indexsub < len(sysinit[curindex][hindex["required-start"]]):
       tempindex = lsbinitd.find_index(sysinit, sysinit[curindex][hindex["required-start"]][indexsub])
       if tempindex == 1000:
-        print("Error! Unable to locate requried dependency", sysinit[curindex][hindex["required-start"]][indexsub], "for script:", slist[index], file=sys.stderr)
+        print("Error! Unable to locate Requried-Start dependency", sysinit[curindex][hindex["required-start"]][indexsub], "for script:", slist[index], file=sys.stderr)
         sys.exit(2)
       if tempindex > newindex:
         newindex = tempindex
@@ -151,7 +151,7 @@ while nomoves == 0:
     if newindex != curindex:
       # Remove it and then put it back in proper order
       if debug == 1:
-        print("Moving", slist[index][hindex["name"]], "to after", sysinit[newindex][hindex["name"]])
+        print("Moving", slist[index], "to after", sysinit[newindex][hindex["name"]])
       scriptvals = sysinit.pop(curindex)
       sysinit.insert(newindex, scriptvals)
       moves += 1
