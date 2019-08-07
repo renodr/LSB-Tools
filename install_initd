@@ -48,7 +48,7 @@ class ParseHeaders(dict):
 beginre = re.compile(re.escape('### BEGIN INIT INFO'))
 endre = re.compile(re.escape('### END INIT INFO'))
 
-# Derrived from scan_intifile() from Debian initdutils.py
+# Derived from scan_intifile() from Debian initdutils.py
 def scan_headers(initfile):
   headerlines = ''
   scanning = False
@@ -112,7 +112,7 @@ debug = 0
 
 # Dictionary to map facilities to script names
 facilities = {
-  # special case for "$firs" and "$last" so that it's always first/last
+  # special case for "$first" and "$last" so that it's always first/last
   # This is exclusively for *dm scripts and reboot/halt
   "$last"      : "98",
   "$first"     : "01",
@@ -197,7 +197,7 @@ for filename in os.listdir(initdDir):
       # We'll do the same for the rest when we build the lists for each RL
       strLink = 'S??' + filename
       fn = os.path.join(rcdDir, "rcS.d", strLink)
-      if glob.glob(fn) or filename == initfile:
+      if glob.glob(fn) or filename == os.path.basename(initfile):
         sysinit.append([filename, provides, reqstart, reqstop, shouldstart, shouldstop, defstart, defstop,])
         slist.append([filename])
     else:
@@ -231,14 +231,14 @@ for runlevel in {0,1,2,3,4,5,6}:
       if rl == str(runlevel):
         strLink = 'S??' + s[hindex["name"]]
         fn = os.path.join(rcdDir, rcrldir, strLink)
-        if glob.glob(fn) or s[hindex["name"]] == initfile:
+        if glob.glob(fn) or s[hindex["name"]] == os.path.basename(initfile):
           strll.append(s[hindex["name"]])
           strld.append(s)
     for rl in s[hindex["stop-runlevels"]]:
       if rl == str(runlevel):
         strLink = 'K??' + s[hindex["name"]]
         fn = os.path.join(rcdDir, rcrldir, strLink)
-        if glob.glob(fn) or s[hindex["name"]] == initfile:
+        if glob.glob(fn) or s[hindex["name"]] == os.path.basename(initfile):
           sprll.append(s[hindex["name"]])
           sprld.append(s)
   startlist[str(runlevel)] = strll
