@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # Begin /usr/lib/lsb/install_initd
 
-import glob, itertools, lsbinitd, os, re, sys
+import glob, itertools, lsbtools, os, re, sys
 from io import StringIO
 
 # Set debug
@@ -28,15 +28,15 @@ hindex = {
 }
 
 # Find init.d directory
-initdDir = lsbinitd.find_initd_dir()
+initdDir = lsbtools.find_initd_dir()
 
 # Find rc base directory
-rcdDir = lsbinitd.find_rc_base_dir()
+rcdDir = lsbtools.find_rc_base_dir()
 
 # Process command line arguments
 for opt in sys.argv:
   if opt == '-h' or opt == '--help':
-    print("Usage:",sys.argv[0], os.path.join(initdDir,"<init-script>"), "[-v|--verbose] [-h|--help")
+    print("Usage:",sys.argv[0], os.path.join(initdDir,"<init-script>"), "[-v|--verbose] [-h|--help") 
     sys.exit(0)
   elif opt == '-v' or opt == '--verbose':
     debug = 1
@@ -58,7 +58,7 @@ if not os.path.exists(initfile):
   sys.exit(1)
 
 # Now, pull in all scripts and depdendencies in initdDir into lists
-matrix = lsbinitd.get_matrix(initdDir, debug)
+matrix = lsbtools.get_matrix(initdDir, debug)
 
 # Update facilites -> script names
 for s in matrix:
@@ -80,9 +80,9 @@ for s in matrix:
 if not os.path.exists(initfile):
   print("Error!", initfile, "does not exist! Exiting...", file=sys.stderr)
   sys.exit(1)
-
+  
 # Find it in the matrix and see what runlevels it starts in
-tindex = lsbinitd.find_index(matrix, os.path.basename(initfile))
+tindex = lsbtools.find_index(matrix, os.path.basename(initfile))
 stlvls = matrix[tindex][hindex["start-runlevels"]]
 splvls = matrix[tindex][hindex["stop-runlevels"]]
 
@@ -153,3 +153,4 @@ for runlevel in matrix[tindex][hindex["stop-runlevels"]]:
     if debug == 1:
       print("Removing link:", glob.glob(linkpath)[0])
     os.remove(glob.glob(linkpath)[0])
+

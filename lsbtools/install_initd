@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # Begin /usr/lib/lsb/install_initd
 
-import glob, itertools, lsbinitd, os, re, sys
+import glob, itertools, lsbtools, os, re, sys
 from io import StringIO
 
 # Set debug
@@ -28,15 +28,15 @@ hindex = {
 }
 
 # Find init.d directory
-initdDir = lsbinitd.find_initd_dir()
+initdDir = lsbtools.find_initd_dir()
 
 # Find rc base directory
-rcdDir = lsbinitd.find_rc_base_dir()
+rcdDir = lsbtools.find_rc_base_dir()
 
 # Process command line arguments
 for opt in sys.argv:
   if opt == '-h' or opt == '--help':
-    print("Usage:",sys.argv[0], os.path.join(initdDir,"<init-script>"), "[-v|--verbose] [-h|--help")
+    print("Usage:",sys.argv[0], os.path.join(initdDir,"<init-script>"), "[-v|--verbose] [-h|--help") 
     sys.exit(0)
   elif opt == '-v' or opt == '--verbose':
     debug = 1
@@ -58,7 +58,7 @@ if not os.path.exists(initfile):
   sys.exit(1)
 
 # Now, pull in all scripts and depdendencies in initdDir into lists
-matrix = lsbinitd.get_matrix(initdDir, debug)
+matrix = lsbtools.get_matrix(initdDir, debug)
 
 # Update facilites -> script names
 for s in matrix:
@@ -67,7 +67,7 @@ for s in matrix:
       if debug == 1:
         print("Adding", prov, ":", s[hindex["name"]])
       facilities[prov] = s[hindex["name"]]
-
+ 
 # Convert facilities that do not match script name to use script name
 for s in matrix:
   for key in facilities.keys():
@@ -100,7 +100,7 @@ for runlevel in {0,1,2,3,4,5,6}:
   strld = []
   sprll = []
   sprld = []
-
+  
   rcrldir = 'rc' + str(runlevel) + '.d'
   for s in itertools.chain(sysinit, matrix):
     for rl in s[hindex["start-runlevels"]]:
@@ -131,11 +131,11 @@ while nomoves == 0:
   index = 0
   moves = 0
   while index < len(slist):
-    curindex = lsbinitd.find_index(sysinit, slist[index])
+    curindex = lsbtools.find_index(sysinit, slist[index])
     newindex = curindex
     indexsub = 0
     while indexsub < len(sysinit[curindex][hindex["required-start"]]):
-      tempindex = lsbinitd.find_index(sysinit, sysinit[curindex][hindex["required-start"]][indexsub])
+      tempindex = lsbtools.find_index(sysinit, sysinit[curindex][hindex["required-start"]][indexsub])
       if tempindex == 1000:
         print("Error! Unable to locate Requried-Start dependency", sysinit[curindex][hindex["required-start"]][indexsub], "for script:", slist[index], file=sys.stderr)
         sys.exit(2)
@@ -144,7 +144,7 @@ while nomoves == 0:
       indexsub += 1
     indexsub = 0
     while indexsub < len(sysinit[curindex][hindex["should-start"]]):
-      tempindex = lsbinitd.find_index(sysinit, sysinit[curindex][hindex["should-start"]][indexsub])
+      tempindex = lsbtools.find_index(sysinit, sysinit[curindex][hindex["should-start"]][indexsub])
       if tempindex != 1000 and tempindex > newindex:
         newindex = tempindex
       indexsub += 1
@@ -169,11 +169,11 @@ for runlevel in {1,2,3,4,5}:
     index = 0
     moves = 0
     while index < len(startlist[str(runlevel)]):
-      curindex = lsbinitd.find_index(startdict[str(runlevel)], startlist[str(runlevel)][index])
+      curindex = lsbtools.find_index(startdict[str(runlevel)], startlist[str(runlevel)][index])
       newindex = curindex
       indexsub = 0
       while indexsub < len(startdict[str(runlevel)][curindex][hindex["required-start"]]):
-        tempindex = lsbinitd.find_index(startdict[str(runlevel)], startdict[str(runlevel)][curindex][hindex["required-start"]][indexsub])
+        tempindex = lsbtools.find_index(startdict[str(runlevel)], startdict[str(runlevel)][curindex][hindex["required-start"]][indexsub])
         if tempindex == 1000:
           # See if we are not in slist[]
           slerror = 1
@@ -189,7 +189,7 @@ for runlevel in {1,2,3,4,5}:
         indexsub += 1
       indexsub = 0
       while indexsub < len(startdict[str(runlevel)][curindex][hindex["should-start"]]):
-        tempindex = lsbinitd.find_index(startdict[str(runlevel)], startdict[str(runlevel)][curindex][hindex["should-start"]][indexsub])
+        tempindex = lsbtools.find_index(startdict[str(runlevel)], startdict[str(runlevel)][curindex][hindex["should-start"]][indexsub])
         if tempindex != 1000 and tempindex > newindex:
           newindex = tempindex
         indexsub += 1
@@ -214,11 +214,11 @@ for runlevel in {0,1,2,3,4,5,6}:
     index = 0
     moves = 0
     while index < len(stoplist[str(runlevel)]):
-      curindex = lsbinitd.find_index(stopdict[str(runlevel)], stoplist[str(runlevel)][index])
+      curindex = lsbtools.find_index(stopdict[str(runlevel)], stoplist[str(runlevel)][index])
       newindex = curindex
       indexsub = 0
       while indexsub < len(stopdict[str(runlevel)][curindex][hindex["required-stop"]]):
-        tempindex = lsbinitd.find_index(stopdict[str(runlevel)], stopdict[str(runlevel)][curindex][hindex["required-stop"]][indexsub])
+        tempindex = lsbtools.find_index(stopdict[str(runlevel)], stopdict[str(runlevel)][curindex][hindex["required-stop"]][indexsub])
         if tempindex == 1000:
           # See if we are not in slist[]
           slerror = 1
@@ -234,7 +234,7 @@ for runlevel in {0,1,2,3,4,5,6}:
         indexsub += 1
       indexsub = 0
       while indexsub < len(stopdict[str(runlevel)][curindex][hindex["should-stop"]]):
-        tempindex = lsbinitd.find_index(stopdict[str(runlevel)], stopdict[str(runlevel)][curindex][hindex["should-stop"]][indexsub])
+        tempindex = lsbtools.find_index(stopdict[str(runlevel)], stopdict[str(runlevel)][curindex][hindex["should-stop"]][indexsub])
         if tempindex != 1000 and tempindex < newindex:
           newindex = tempindex
         indexsub += 1
@@ -248,7 +248,7 @@ for runlevel in {0,1,2,3,4,5,6}:
       index += 1
     if moves == 0:
       nomoves = 1
-
+ 
 
 # For scripts we manage, remove existing symlinks and create new for sysinit
 rldir = os.path.join(rcdDir, "rcS.d")
@@ -333,3 +333,4 @@ for runlevel in {0,1,2,3,4,5,6}:
       print("Adding", spath)
     os.symlink(target, spath)
     sid += increment
+
