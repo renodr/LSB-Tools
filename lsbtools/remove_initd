@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
 # Begin /usr/lib/lsb/install_initd
 
-import glob, itertools, lsbtools, os, re, sys
+import argparse, glob, itertools, lsbtools, os, re, sys
 from io import StringIO
 
-# Set debug
-debug = 0
 
 # Dictionary to map facilities to script names
 facilities = {
@@ -34,28 +32,30 @@ initdDir = lsbtools.find_initd_dir()
 rcdDir = lsbtools.find_rc_base_dir()
 
 # Process command line arguments
-for opt in sys.argv:
-  if opt == '-h' or opt == '--help':
-    print("Usage:",sys.argv[0], os.path.join(initdDir,"<init-script>"), "[-v|--verbose] [-h|--help") 
-    sys.exit(0)
-  elif opt == '-v' or opt == '--verbose':
-    debug = 1
-  elif re.search("^-", opt):
-    badopt = "'" + opt + "'!"
-    print("Error: invalid argument", badopt, "Exiting...", file=sys.stderr)
-    sys.exit(1)
-  else:
-    initfile = opt
-    ap = os.path.abspath(initfile)
-    if os.path.exists(ap):
-      initfile = ap
-    else:
-      initfile = os.path.join(initdDir, initfile)
+parser = argparse.ArgumentParser()
+parser.add_argument("-v", "--verbose", help="Show verbose debug messages", action="store_true")
+parser.add_argument("-d", "--dryrun", help="Show actions without modifying system", action="store_true")
+parser.add_argument("initfile", help="The new init.d file to be activated")
 
+args = parser.parse_args()
+
+if not os.path.exists(args.initfile):
+  initfile = os.path.join(initdDir, args.initfile)
+else:
+  initfile = args.initfile
 if not os.path.exists(initfile):
-  print("Error:", initfile, "does not exist! Exiting...", file=sys.stderr)
-  print("Usage:",sys.argv[0], os.path.join(initdDir,"<init-script>"), "[-v|--verbose] [-h|--help", file=sys.stderr)
+  print("Error! Initfile", initfile, "does not exist. Exiting...", file=sys.stderr)
   sys.exit(1)
+
+if args.verbose:
+  debug = 1
+else:
+  debug = 0
+
+if args.dryrun:
+  dryrun = 1
+else:
+  dryrun = 0
 
 # Now, pull in all scripts and depdendencies in initdDir into lists
 matrix = lsbtools.get_matrix(initdDir, debug)
@@ -142,15 +142,17 @@ for runlevel in matrix[tindex][hindex["start-runlevels"]]:
   linkdir = "rc" + runlevel + ".d"
   linkpath = os.path.join(rcdDir, linkdir, link)
   if glob.glob(linkpath):
-    if debug == 1:
+    if debug == 1 or dryrun == 1:
       print("Removing link:", glob.glob(linkpath)[0])
-    os.remove(glob.glob(linkpath)[0])
+    if dryrun == 0:
+      os.remove(glob.glob(linkpath)[0])
 for runlevel in matrix[tindex][hindex["stop-runlevels"]]:
   link = "K??" + matrix[tindex][hindex["name"]]
   linkdir = "rc" + runlevel + ".d"
   linkpath = os.path.join(rcdDir, linkdir, link)
   if glob.glob(linkpath):
-    if debug == 1:
+    if debug == 1 or dryrun == 1:
       print("Removing link:", glob.glob(linkpath)[0])
-    os.remove(glob.glob(linkpath)[0])
+    if dryrun == 0:
+      os.remove(glob.glob(linkpath)[0])
 
