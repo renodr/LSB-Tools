@@ -7,7 +7,7 @@ setup(
     license='MIT',
     author='DJ Lucas',
     author_email='dj@linuxfromscratch.org',
-    url='https://github.com/djlucas/python3-lsb-tools/',
+    url='https://github.com/djlucas/LSB-Tools/',
     description='A distribution agnostic set of LSB scripts.',
     long_description=open('README').read(),
     scripts=['lsbtools/install_initd', 'lsbtools/remove_initd'],
