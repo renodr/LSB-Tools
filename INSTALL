@@ -1,4 +1,2 @@
-For an LSB compliant installtion, you'll likely need to use the following:
-
-python3 setup.py install --install-scripts=/usr/lib/lsb
+python3 setup.py install
 
