@@ -73,14 +73,36 @@ if not os.path.exists("/etc/lsb-release"):
   print("Required configuration file '/etc/lsb-relase' is not found. Exiting...", file=sys.stderr)
   sys.exit(1)
 
-file = open("/etc/lsb-release", 'r')
-content = file.read()
+conffile = open("/etc/lsb-release", 'r')
+content = conffile.read()
 items = content.split('\n')
 for pair in items:
   if pair != '':
     key,val = pair.split('=')
     config[key] = val.strip('\"')
-file.close()
+conffile.close()
+
+# As of LSB-2.0, the LSB Version string is comprised of colon separated modules
+# A module can be represented directly in the LSB_VERSION value or consist
+# of empty files with the name of the module in /etc/lsb-release.d/
+lsbver = ''
+if not os.path.isdir("/etc/lsb-release.d"):
+  lsbver = config['LSB_VERSION']
+else:
+  if len(os.listdir('/etc/lsb-release.d')) == 0:
+    lsbver = config['LSB_VERSION']
+  else:
+    if config['LSB_VERSION'] != 'unavailable':
+      lsbver = config['LSB_VERSION']
+    # See what else is there
+    for lsbfile in os.listdir('/etc/lsb-release.d'):
+      if lsbver == '':
+        lsbver = basename(lsbfile)
+      else:
+        lsbver = lsbver + ":" + lsbfile
+
+# Set the LSB Version to our assembled string
+config['LSB_VERSION'] = lsbver.strip(' ')
 
 if lv == 1:
   if ls == 1:
