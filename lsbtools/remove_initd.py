@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 # Begin /usr/lib/lsb/install_initd
 
-import argparse, glob, itertools, lsbtools, os, re, sys
+import sys
+if sys.version_info < (3, 7):
+  sys.exit("Python %s.%s or later is required.\n" %(3, 7))
+
+import argparse, glob, itertools, lsbtools, os, re
 from io import StringIO
 
 

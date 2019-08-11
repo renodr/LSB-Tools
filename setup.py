@@ -1,6 +1,11 @@
+#!/usr/bin/env python3
+import sys
+if sys.version_info < (3, 7):
+  sys.exit("Python %s.%s or later is required.\n" %(3, 7))
+
 from setuptools import setup
 from setuptools.command.install import install
-import os, re, site, sys
+import os, re, site
 
 
 class OSInstall(install):
