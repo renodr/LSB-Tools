@@ -3,5 +3,13 @@
     LSB Tools
 =================
 
-A distribution agnostic set of utilites for lsb compliance.
+A distribution agnostic set of utilites for LSB compliance that includes the
+following utilities:
+/usr/lib/lsb/install_initd: a tool to activate systyem init scripts installed
+                            into the /etc/rc.d/init.d directory.
+/usr/lib/lsb/remove_initd:  a tool to deactivate system init scripts installed
+                            into the /etc/rc.d/init.d direcorty.
+/usr/bin/lsb_releae:        a tool to determine distribution information and
+                            available LSB modules
+
 
