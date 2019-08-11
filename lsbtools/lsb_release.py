@@ -68,13 +68,6 @@ else:
 if lv == 0 and li == 0 and ld == 0 and lr == 0 and lc == 0:
   lv = 1
 
-print("lv is:", lv,
-      "li is:", li,
-      "ld is:", ld,
-      "lr is:", lr,
-      "lc is:", lc,
-      "ls is:", ls)
-
 # Read required configuration file
 if not os.path.exists("/etc/lsb-release"):
   print("Required configuration file '/etc/lsb-relase' is not found. Exiting...", file=sys.stderr)
