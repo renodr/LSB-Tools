@@ -54,7 +54,7 @@ setup(
         'install': OSInstall,
     },
     name='LSB-Tools',
-    version='0.2',
+    version='0.3',
     packages=['lsbtools',],
     license='MIT',
     author='DJ Lucas',
