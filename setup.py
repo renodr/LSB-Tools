@@ -20,13 +20,13 @@ class OSInstall(install):
         if foundroot == 0:
             rootdir = ""
         lsbdir = rootdir + "/usr/lib/lsb"
-        #bindir = rootdir + "/usr/bin"
+        bindir = rootdir + "/usr/bin"
         sitepkgdir = site.getsitepackages()[0]
         pkgdir = rootdir + sitepkgdir + "/lsbtools"
         if not os.path.exists(lsbdir):
             os.mkdir(lsbdir)
-        #if not os.path.exists(bindir):
-        #    os.mkdir(bindir)
+        if not os.path.exists(bindir):
+            os.mkdir(bindir)
         iid = pkgdir + "/install_initd.py"
         riid = sitepkgdir + "/lsbtools" + "/install_initd.py"
         did = lsbdir + "/install_initd"
@@ -35,12 +35,19 @@ class OSInstall(install):
         rird = sitepkgdir + "/lsbtools" + "/remove_initd.py"
         drd = lsbdir + "/remove_initd"
         dtrd = drd + '.temp'
+        ilr = pkgdir + "/lsb_release.py"
+        rilr = sitepkgdir + "/lsbtools" + "/lsb_release.py"
+        dlr = bindir + "/lsb_release"
+        dtlr = dlr + '.temp'
         os.symlink(riid, dtid)
         os.rename(dtid, did)
         os.symlink(rird, dtrd)
         os.rename(dtrd, drd)
+        os.symlink(rilr, dtlr)
+        os.rename(dtlr, dlr)
         os.chmod(iid, 0o755)
         os.chmod(ird, 0o755)
+        os.chmod(ilr, 0o755)
 
 setup(
     cmdclass={
