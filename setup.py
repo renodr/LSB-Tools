@@ -12,13 +12,22 @@ class OSInstall(install):
     """Allow OS installation"""
     def run(self):
         foundroot = 0
-        install.run(self)
         for arg in sys.argv:
             if re.match("--root=.*", arg):
                 rootdir = arg.split("=")[1]
                 foundroot = 1
+            if re.match("--home.*", arg):
+                print("The '--home' argument is not supported.", file=sys.stderr)
+                sys.exit(1)
+            if re.match("--install.*", arg):
+                print("The '--install-*' arguments are not supported.", file=sys.stderr)
+                sys.exit(1)
+            if re.match("--prefix.*", arg):
+                print("The '--prefix' argument is not supported.", file=sys.stderr)
+                sys.exit(1)
         if foundroot == 0:
             rootdir = ""
+        install.run(self)
         lsbdir = rootdir + "/usr/lib/lsb"
         bindir = rootdir + "/usr/bin"
         sitepkgdir = site.getsitepackages()[0]

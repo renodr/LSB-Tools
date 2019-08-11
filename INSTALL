@@ -1,2 +1,13 @@
-python3 setup.py install
+To install as a system utility, as the root user, simply run: 
+# python3 setup.py install --optimize=1
+
+To create a packaged directory, run as your packaging user with the '--root'
+argument.
+
+As this is a noarch system utiltity, the seutp.py install agurments --home,
+--install-base, --install-data, --install-purelib, --install-platlib,
+--install-scripts, and --prefix are explicitly disallowed.
+
+While a development install is possible, symlinks are not created in the
+OS paths.
 
