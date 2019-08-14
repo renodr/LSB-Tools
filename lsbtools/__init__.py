@@ -147,8 +147,8 @@ def install_font(argobject):
       print(fontfile, "exists in filesystem."
       sys.exit(0)
     elif remove == 1:
-      os.remove(fontile)
-      print(fontile, "successfully removed."
+      os.remove(fontfile)
+      print(fontfile, "successfully removed."
       sys.exit(0)
     else:
       print("Error:", fontfile, "already exists in filesystem. Exiting...", file=sys.stderr)
@@ -164,5 +164,34 @@ def install_font(argobject):
       copyfile(argsobject, fontDir)
       os.chmod(fontfile, 0o644)
       sys.exit(0)
+
+
+def install_init(argobject):
+  initdDir = lsbtools.find_initd_dir()
+  aobject = os.path.basename(argsobject).strip(" ")
+  initfile = os.path.join(initdDir, aobject)
+  if os.path.exists(initfile):
+    if check == 1:
+      print(initfile, "exists in filesystem."
+      sys.exit(0)
+    elif remove == 1:
+      os.remove(initfile)
+      print(initfile, "successfully removed."
+      sys.exit(0)
+    else:
+      print("Error:", initfile, "already exists in filesystem. Exiting...", file=sys.stderr)
+      sys.exit(1)
+  else:
+    if check == 1:
+      print(initfile, "does not exist in filesystem.")
+      sys.exit(1)
+    elif remove == 1:
+      print(initfile, "does not exist in filesystem. No need to remove.")
+      sys.exit(0)
+    else:
+      copyfile(argsobject, initdDir)
+      os.chmod(initfile, 0o644)
+      sys.exit(0)
+
 
 
