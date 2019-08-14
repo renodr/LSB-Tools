@@ -114,6 +114,14 @@ def find_rc_base_dir():
   return rcdDir
 
 
+def find_font_dir():
+  lsb_fontdir = "/usr/share/fonts/lsb"
+  if not os.path.exists(lsb_fontdir):
+    os.mkdir(lsb_fontdir)
+    os.chmod(lsb_fondir, 0o755)
+  return lsb_fontdir
+
+
 def get_matrix(initdDir, debug):
   matrix = []
   for filename in os.listdir(initdDir):
@@ -128,5 +136,33 @@ def get_matrix(initdDir, debug):
     if filename != "template" and filename != "rc":
       matrix.append([filename, provides, reqstart, reqstop, shouldstart, shouldstop, defstart, defstop,])
   return matrix
+
+
+def install_font(argobject):
+  fontDir = lsbtools.find_font_dir()
+  aobject = os.path.basename(argsobject).strip(" ")
+  fontfile = os.path.join(fontDir, aobject)
+  if os.path.exists(fontfile):
+    if check == 1:
+      print(fontfile, "exists in filesystem."
+      sys.exit(0)
+    elif remove == 1:
+      os.remove(fontile)
+      print(fontile, "successfully removed."
+      sys.exit(0)
+    else:
+      print("Error:", fontfile, "already exists in filesystem. Exiting...", file=sys.stderr)
+      sys.exit(1)
+  else:
+    if check == 1:
+      print(fontfile, "does not exist in filesystem.")
+      sys.exit(1)
+    elif remove == 1:
+      print(fontfile, "does not exist in filesystem. No need to remove.")
+      sys.exit(0)
+    else:
+      copyfile(argsobject, fontDir)
+      os.chmod(fontfile, 0o644)
+      sys.exit(0)
 
 
