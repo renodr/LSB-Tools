@@ -234,8 +234,14 @@ def install_service(argobject):
       servalias = servalias + argobject[count] + ' '
       count += 1
   if check == 1:
-    portcheck = socket.getservbyname(portservice, portproto[1])
-    namecheck = socket.getservbyport(int(portproto[0]), portproto[1])
+    try:
+      portcheck = socket.getservbyname(portservice, portproto[1])
+    except OSError:
+      portcheck = 'error'
+    try:
+      namecheck = socket.getservbyport(int(portproto[0]), portproto[1])
+    except OSError:
+      namecheck = 'error'
     if portcheck == portproto[0] and namecheck == portservice:
       print("Service", portservice, "with port", portproto[0], "on protocol", portproto[1], "exists.")
       sys.exit(0)
@@ -247,7 +253,11 @@ def install_service(argobject):
     print("Adding service", portservice, "with port", portproto[0], "on protocol", portproto[1])
   else:
     print("Adding service", portservice, "with port", portproto[0], "on protocol", portproto[1], "with aliases:", servalias)
-  if portservice != socket.getservbyport(int(portproto[0]), portproto[1]):
+  try:
+    nameservice = socket.getservbyport(int(portproto[0]), portproto[1])
+  except OSError:
+    nameservice = 'error'
+  if portservice != nameservice:
     namesp = 25 - len(portservice) - len(argobject[0])
     fmtstr = portservice
     count = 0
