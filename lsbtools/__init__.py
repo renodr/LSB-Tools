@@ -194,4 +194,31 @@ def install_init(argobject):
       sys.exit(0)
 
 
+def install_profile(argobject):
+  profileDir = "/etc/profile.d"
+  aobject = os.path.basename(argsobject).strip(" ")
+  profilefile = os.path.join(profileDir, aobject)
+  if os.path.exists(profilefile):
+    if check == 1:
+      print(profilefile, "exists in filesystem."
+      sys.exit(0)
+    elif remove == 1:
+      os.remove(profilefile)
+      print(initfile, "successfully removed."
+      sys.exit(0)
+    else:
+      print("Error:", profilefile, "already exists in filesystem. Exiting...", file=sys.stderr)
+      sys.exit(1)
+  else:
+    if check == 1:
+      print(profilefile, "does not exist in filesystem.")
+      sys.exit(1)
+    elif remove == 1:
+      print(profilefile, "does not exist in filesystem. No need to remove.")
+      sys.exit(0)
+    else:
+      copyfile(argsobject, profileDir)
+      os.chmod(profilefile, 0o644)
+      sys.exit(0)
+
 
