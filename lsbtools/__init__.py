@@ -138,6 +138,6 @@ def get_matrix(initdDir, debug):
   return matrix
 
 def get_prog_ver(strprogram):
-  progver = strprogram + " " + " (LSB-Tools-0.3)"
+  progver = strprogram + " " + " (LSB-Tools-0.4)"
   return progver
 

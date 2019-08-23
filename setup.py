@@ -72,7 +72,7 @@ setup(
         'install': OSInstall,
     },
     name='LSB-Tools',
-    version='0.3',
+    version='0.4',
     packages=['lsbtools',],
     license='MIT',
     author='DJ Lucas',
