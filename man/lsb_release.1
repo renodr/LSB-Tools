@@ -66,13 +66,6 @@ Where \fIDistributor\fR can be a couple of words, but then concatenated
 .br
 \fIx.x\fR starts with a digit followed by any non-blank characters,
 \fICodename\fR will also be concatenated (blanks cleanup only).
-
-\fBrelease\fR may not be used as a keyword in \fBDISTRIB_DESCRIPTION\fR
-if you don't want to override \fB"/etc/\fIdistrib\fB-release"\fR data.
-
-\fBNotice:\fR To support the \fBDebian\fR distributions' lack of
-information (see "/etc/debian_version" file) some have been directly
-added into the \fBlsb_release\fR script.
 .SH EXAMPLES
 If the "\fB/etc/lsb-release\fR" file contains:
 
@@ -101,27 +94,12 @@ Codename:       TryIt
 .B $ ./lsb_release -a -s
 .br
 1.0 MyDistrib "I enjoy using my distrib" 1.0RC4 TryIt
-
-If the "/etc/lsb-release" file is absent (indicating this is
-not an LSB compliant distribution), the result will be:
-
-.B $ ./lsb_release -a
-.br
-LSB Version:    n/a
-.br
-Distributor ID: MyDistrib
-.br
-Description:    My Linux Distrib release 1.0RC4 (TryIt)
-.br
-Release:        1.0RC4
-.br
-Codename:       TryIt
 .SH AUTHOR
 Written by DJ Lucas.
 .SH "REPORTING BUGS"
 Report bugs at https://github.com/djlucas/LSB-Tools/.
 Please include a complete, self contained example that will allow the
-bug to be reproduced, and say which version of lsb_release you are using.
+bug to be reproduced, and say which version of LSB-Tools you are using.
 .SH COPYRIGHT
 Copyright \(co 2019 DJ Lucas
 .br
