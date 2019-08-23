@@ -19,14 +19,25 @@ printval = ''
 
 # Process command line argurments
 parser = argparse.ArgumentParser()
-parser.add_argument("-v", "--version", help="Display the version of the LSB specification against which the distribution is compliant.", action="store_true")
-parser.add_argument("-i", "--id", help="Display the string id of the distributor.", action="store_true")
-parser.add_argument("-d", "--description", help="Display the single line text description of the distribution.", action="store_true")
-parser.add_argument("-r", "--release", help="Display the release number of the distribution.", action="store_true")
-parser.add_argument("-c", "--codename", help="Display the codename according to the distribution release.", action="store_true")
-parser.add_argument("-a", "--all", help="Display all of the above information.", action="store_true")
-parser.add_argument("-s", "--short", help="Display all of the above information in short output format.", action="store_true")
+parser.add_argument("-v", "--version", help="Display the version of the LSB specification against which the distribution is compliant", action="store_true")
+parser.add_argument("-i", "--id", help="Display the string id of the distributor", action="store_true")
+parser.add_argument("-d", "--description", help="Display the single line text description of the distribution", action="store_true")
+parser.add_argument("-r", "--release", help="Display the release number of the distribution", action="store_true")
+parser.add_argument("-c", "--codename", help="Display the codename according to the distribution release", action="store_true")
+parser.add_argument("-a", "--all", help="Display all of the above information", action="store_true")
+parser.add_argument("-s", "--short", help="Display all of the above information in short output format", action="store_true")
+parser.add_argument("--progver", help=argparse.SUPPRESS, action="store_true")
 args = parser.parse_args()
+
+if args.progver:
+  strver = lsbtools.get_prog_ver(sys.argv[0])
+  print(strver, "\n")
+  print("Copyright (C) 2019 DJ Lucas")
+  print("This is free software; see the source for copying conditions.  There is NO")
+  print("warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.")
+  print("\nWritten by DJ Lucas.\n")
+  sys.exit(0)
+
 
 if args.version:
   lv = 1

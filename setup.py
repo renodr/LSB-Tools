@@ -30,12 +30,18 @@ class OSInstall(install):
         install.run(self)
         lsbdir = rootdir + "/usr/lib/lsb"
         bindir = rootdir + "/usr/bin"
+        man1dir = rootdir + "/usr/share/man/man1"
+        man8dir = rootdir + "/usr/share/man/man8"
         sitepkgdir = site.getsitepackages()[0]
         pkgdir = rootdir + sitepkgdir + "/lsbtools"
         if not os.path.exists(lsbdir):
             os.mkdir(lsbdir)
         if not os.path.exists(bindir):
             os.mkdir(bindir)
+        if not os.path.exists(man1dir):
+            os.mkdir(man1dir)
+        if not os.path.exists(man8dir):
+            os.mkdir(man8dir)
         iid = pkgdir + "/install_initd.py"
         riid = sitepkgdir + "/lsbtools" + "/install_initd.py"
         did = lsbdir + "/install_initd"
@@ -53,6 +59,9 @@ class OSInstall(install):
         os.symlink(rird, dtrd)
         os.rename(dtrd, drd)
         os.symlink(rilr, dtlr)
+        os.copy("man/lsb_release.1", man1dir)
+        os.copy("man/install_initd.8", man8dir)
+        os.copy("man/remove_initd.8", man8dir)
         os.rename(dtlr, dlr)
         os.chmod(iid, 0o755)
         os.chmod(ird, 0o755)
@@ -73,5 +82,9 @@ setup(
     long_description=open('README').read(),
     python_requires='>3.7',
     platforms=['linux'],
-    data_files = [('', ['LICENSE']),('', ['INSTALL'])]
+    data_files = [('', ['LICENSE']),
+                  ('', ['INSTALL']),
+                  ('', ['man/lsb_release.1']),
+                  ('', ['man/install_initd.8']),
+                  ('', ['man/remove_initd.8']),]
 )

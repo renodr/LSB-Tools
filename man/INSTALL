@@ -1,0 +1,14 @@
+To regenerate manual pages, run the following commands:
+
+bash help2man -N --include lsb_release.examples \
+                 --version-string=--progver --section=1 \
+                 /usr/bin/lsb_release > lsb_release.1
+bash help2man -N --include install_initd.examples \
+                 --version-string=--progver --section=8 \
+                 /usr/lib/lsb/install_initd > install_initd.8
+bash help2man -N --include lsb_release.examples \
+                 --version-string=--progver --section=8 \
+                 /usr/lib/lsb/remove_initd > remove_initd.8
+
+
+

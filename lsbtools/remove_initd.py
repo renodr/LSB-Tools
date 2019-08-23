@@ -39,9 +39,19 @@ rcdDir = lsbtools.find_rc_base_dir()
 parser = argparse.ArgumentParser()
 parser.add_argument("-v", "--verbose", help="Show verbose debug messages", action="store_true")
 parser.add_argument("-d", "--dryrun", help="Show actions without modifying system", action="store_true")
-parser.add_argument("initfile", help="The new init.d file to be activated")
+parser.add_argument("--progver", help=argparse.SUPPRESS, action="store_true")
+parser.add_argument("initfile", nargs="?", default="null", help="The init.d file to be deactivated")
 
 args = parser.parse_args()
+
+if args.progver:
+  strver = lsbtools.get_prog_ver(sys.argv[0])
+  print(strver, "\n")
+  print("Copyright (C) 2019 DJ Lucas")
+  print("This is free software; see the source for copying conditions.  There is NO")
+  print("warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.")
+  print("\nWritten by DJ Lucas.\n")
+  sys.exit(0)
 
 if not os.path.exists(args.initfile):
   initfile = os.path.join(initdDir, args.initfile)

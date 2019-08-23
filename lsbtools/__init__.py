@@ -137,3 +137,7 @@ def get_matrix(initdDir, debug):
       matrix.append([filename, provides, reqstart, reqstop, shouldstart, shouldstop, defstart, defstop,])
   return matrix
 
+def get_prog_ver(strprogram):
+  progver = strprogram + " " + " (LSB-Tools-0.3)"
+  return progver
+
