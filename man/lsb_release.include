@@ -14,9 +14,7 @@ compliant, the above field should
 be present.
 
 Optional fields are \fBDISTRIB_ID\fR, \fBDISTRIB_RELEASE\fR,
-\fBDISTRIB_CODENAME\fR, \fBDISTRIB_DESCRIPTION\fR and can be used to
-override information which is parsed from the 
-\fB"/etc/\fIdistrib\fB-release"\fR file.
+\fBDISTRIB_CODENAME\fR, \fBDISTRIB_DESCRIPTION\fR.
 
 If the \fB"/etc/lsb-release.d"\fR directory exists, it is
 searched for filenames which are taken as additional module-version
