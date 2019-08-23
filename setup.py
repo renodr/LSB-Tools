@@ -5,7 +5,7 @@ if sys.version_info < (3, 7):
 
 from setuptools import setup
 from setuptools.command.install import install
-import os, re, site
+import os, re, shutil, site
 
 
 class OSInstall(install):
@@ -59,9 +59,9 @@ class OSInstall(install):
         os.symlink(rird, dtrd)
         os.rename(dtrd, drd)
         os.symlink(rilr, dtlr)
-        os.copy("man/lsb_release.1", man1dir)
-        os.copy("man/install_initd.8", man8dir)
-        os.copy("man/remove_initd.8", man8dir)
+        shutil.copy2("man/lsb_release.1", man1dir)
+        shutil.copy2("man/install_initd.8", man8dir)
+        shutil.copy2("man/remove_initd.8", man8dir)
         os.rename(dtlr, dlr)
         os.chmod(iid, 0o755)
         os.chmod(ird, 0o755)
