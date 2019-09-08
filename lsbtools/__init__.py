@@ -147,11 +147,11 @@ def install_font(argobject):
   fontfile = os.path.join(fontDir, aobject)
   if os.path.exists(fontfile):
     if check == 1:
-      print(fontfile, "exists in filesystem."
+      print(fontfile, "exists in filesystem.")
       sys.exit(0)
     elif remove == 1:
       os.remove(fontfile)
-      print(fontfile, "successfully removed."
+      print(fontfile, "successfully removed.")
       sys.exit(0)
     else:
       print("Error:", fontfile, "already exists in filesystem. Exiting...", file=sys.stderr)
@@ -175,11 +175,11 @@ def install_init(argobject):
   initfile = os.path.join(initdDir, aobject)
   if os.path.exists(initfile):
     if check == 1:
-      print(initfile, "exists in filesystem."
+      print(initfile, "exists in filesystem.")
       sys.exit(0)
     elif remove == 1:
       os.remove(initfile)
-      print(initfile, "successfully removed."
+      print(initfile, "successfully removed.")
       sys.exit(0)
     else:
       print("Error:", initfile, "already exists in filesystem. Exiting...", file=sys.stderr)
@@ -203,11 +203,11 @@ def install_profile(argobject):
   profilefile = os.path.join(profileDir, aobject)
   if os.path.exists(profilefile):
     if check == 1:
-      print(profilefile, "exists in filesystem."
+      print(profilefile, "exists in filesystem.")
       sys.exit(0)
     elif remove == 1:
       os.remove(profilefile)
-      print(initfile, "successfully removed."
+      print(initfile, "successfully removed.")
       sys.exit(0)
     else:
       print("Error:", profilefile, "already exists in filesystem. Exiting...", file=sys.stderr)
@@ -269,7 +269,7 @@ def install_service(argobject):
       count += 1
     fmtstr = fmtstr + argobject[0]
     servicesfile=open("/etc/services", "a")
-    servicesfile.write("%s\r\n" fmtstr)
+    servicesfile.write("%s\r\n", fmtstr)
     servicesfile.close()
     sys.exit(0)
   else:
