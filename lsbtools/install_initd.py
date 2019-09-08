@@ -12,8 +12,8 @@ from io import StringIO
 facilities = {
   # special case for "$first" and "$last" so that it's always first/last
   # This is exclusively for *dm scripts and reboot/halt
-  "$last"      : "98",
-  "$first"     : "01",
+  "$first"    : "01",
+  "$last"     : "98",
 }
 
 # Create map for headers index numbers used in "sysinit" and "matrix" lists
@@ -80,6 +80,10 @@ if not os.path.exists(initfile):
 matrix = lsbtools.get_matrix(initdDir, debug)
 
 # Update facilites -> script names
+if debug == 1:
+  print("Creating facilities array:")
+  print("Adding $first : 01")
+  print("Adding $last : 98")
 for s in matrix:
   for prov in s[hindex["provides"]]:
     if prov != s[hindex["name"]]:
@@ -134,8 +138,14 @@ for runlevel in {0,1,2,3,4,5,6}:
         strLink = 'K??' + s[hindex["name"]]
         fn = os.path.join(rcdDir, rcrldir, strLink)
         if glob.glob(fn) or s[hindex["name"]] == os.path.basename(initfile):
-          sprll.append(s[hindex["name"]])
-          sprld.append(s)
+          # Only if not already in sprll (could be in slist and appear twice)
+          ct = 0
+          for t in sprll:
+            if s[hindex["name"]] == t:
+              ct += 1
+          if ct < 1:
+            sprll.append(s[hindex["name"]])
+            sprld.append(s)
   startlist[str(runlevel)] = strll
   startdict[str(runlevel)] = strld
   stoplist[str(runlevel)] = sprll
@@ -239,11 +249,16 @@ for runlevel in {0,1,2,3,4,5,6}:
       while indexsub < len(stopdict[str(runlevel)][curindex][hindex["required-stop"]]):
         tempindex = lsbtools.find_index(stopdict[str(runlevel)], stopdict[str(runlevel)][curindex][hindex["required-stop"]][indexsub])
         if tempindex == 1000:
-          # See if we are not in slist[]
+          # See if stop dep is started in sysinit
           slerror = 1
-          for sl in slist:
+          #runlevels 1 and 2 are special cases WRT stop scripts
+          if runlevel == 1 or runlevel == 2:
+            prevlist = itertools.chain(slist, startlist[str(runlevel)])
+          else:
+            prevlist = slist
+          for sl in prevlist:
             if stopdict[str(runlevel)][curindex][hindex["required-stop"]][indexsub] == sl:
-              # It's in sysinit, so just ignore it.
+              # It's in sysinit or started in current runnlevel, so just ignore
               slerror = 0
           if slerror == 1:
             print("Error! Unable to locate Requried-Stop dependency", stopdict[str(runlevel)][curindex][hindex["required-stop"]][indexsub], "for script:", stoplist[str(runlevel)][index], file=sys.stderr)
@@ -267,7 +282,6 @@ for runlevel in {0,1,2,3,4,5,6}:
       index += 1
     if moves == 0:
       nomoves = 1
- 
 
 # For scripts we manage, remove existing symlinks and create new for sysinit
 rldir = os.path.join(rcdDir, "rcS.d")
@@ -275,12 +289,11 @@ for s in sysinit:
   sname = s[hindex["name"]]
   gname = "S??" + sname
   spath = os.path.join(rldir, gname)
-  lpath = glob.glob(spath)[0]
-  if os.path.exists(lpath):
+  if glob.glob(spath):
     if debug == 1 or dryrun == 1:
-      print("Removing", lpath)
+      print("Removing", glob.glob(spath)[0])
     if dryrun == 0:
-      os.remove(lpath)
+      os.remove(glob.glob(spath)[0])
 increment = 100 // len(sysinit)
 sid = 0
 for s in sysinit:
