@@ -1,7 +1,7 @@
-#!/usr/bin/env python3
 import sys
-if sys.version_info < (3, 7):
-  sys.exit("Python %s.%s or later is required.\n" %(3, 7))
+
+if sys.version_info < (3,7):
+    sys.exit("Python %s.%s or later is required.\n" %(3, 7))
 
 from setuptools import setup
 from setuptools.command.install import install
@@ -17,13 +17,13 @@ class OSInstall(install):
                 rootdir = arg.split("=")[1]
                 foundroot = 1
             if re.match("--home.*", arg):
-                print("The '--home' argument is not supported.", file=sys.stderr)
+                sys.stderr.write("The '--home' argument is not supported.")
                 sys.exit(1)
             if re.match("--install.*", arg):
-                print("The '--install-*' arguments are not supported.", file=sys.stderr)
+                sys.stderr.write("The '--install-*' arguments are not supported.")
                 sys.exit(1)
             if re.match("--prefix.*", arg):
-                print("The '--prefix' argument is not supported.", file=sys.stderr)
+                sys.stderr.write("The '--prefix' argument is not supported.")
                 sys.exit(1)
         if foundroot == 0:
             rootdir = ""
@@ -35,13 +35,17 @@ class OSInstall(install):
         sitepkgdir = site.getsitepackages()[0]
         pkgdir = rootdir + sitepkgdir + "/lsbtools"
         if not os.path.exists(lsbdir):
-            os.mkdir(lsbdir)
+            print("Creating: ", lsbdir)
+            os.makedirs(lsbdir)
         if not os.path.exists(bindir):
-            os.mkdir(bindir)
+            print("Creating: ", bindir)
+            os.makedirs(bindir)
         if not os.path.exists(man1dir):
-            os.mkdir(man1dir)
+            print("Creating: ", man1dir)
+            os.makedirs(man1dir)
         if not os.path.exists(man8dir):
-            os.mkdir(man8dir)
+            print("Creating: ", man8dir)
+            os.makedirs(man8dir)
         iid = pkgdir + "/install_initd.py"
         riid = sitepkgdir + "/lsbtools" + "/install_initd.py"
         did = lsbdir + "/install_initd"
@@ -54,6 +58,21 @@ class OSInstall(install):
         rilr = sitepkgdir + "/lsbtools" + "/lsb_release.py"
         dlr = bindir + "/lsb_release"
         dtlr = dlr + '.temp'
+        ili = pkgdir + "lsbinstall.py"
+        rili = sitepkgdir + "/lsbtools" + "/lsbinstall.py"
+        dli = bindir + "/lsbinstall.py"
+        dtli = dli + '.temp'
+        # setuptools depends on lsb_release
+        # hardcode the interpreter for Python upgrades
+        myshebang = "#!" + os.path.dirname(sys.executable) + "/" + os.readlink(sys.executable)
+        with open(iid, 'r') as original: data = original.read()
+        with open(iid, 'w') as modified: modified.write(myshebang + "\n" + data)
+        with open(ird, 'r') as original: data = original.read()
+        with open(ird, 'w') as modified: modified.write(myshebang + "\n" + data)
+        with open(ilr, 'r') as original: data = original.read()
+        with open(ilr, 'w') as modified: modified.write(myshebang + "\n" + data)
+        with open(ili, 'r') as original: data = original.read()
+        with open(ili, 'w') as modified: modified.write(myshebang + "\n" + data)
         os.symlink(riid, dtid)
         os.rename(dtid, did)
         os.symlink(rird, dtrd)

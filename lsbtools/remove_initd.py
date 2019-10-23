@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # Begin /usr/lib/lsb/install_initd
 
 import sys

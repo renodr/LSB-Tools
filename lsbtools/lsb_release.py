@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # Begin /usr/bin/lsb_release
 
 import sys
