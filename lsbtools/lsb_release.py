@@ -1,3 +1,4 @@
+#!/usr/bin/python3.7
 # Begin /usr/bin/lsb_release
 
 import sys
@@ -118,31 +119,36 @@ if lv == 1:
   if ls == 1:
     printval = printval + " " + config['LSB_VERSION']
   else:
-    print("LSB Version:   ", config['LSB_VERSION'])
+    lprintval = "LSB Version:\t" + config['LSB_VERSION']
+    print(lprintval)
 
 if li == 1:
   if ls == 1:
     printval = printval + " " + config['DISTRIB_ID']
   else:
-    print("Distributor ID:", config['DISTRIB_ID'])
+    lprintval = "Distributor ID:\t" + config['DISTRIB_ID']
+    print(lprintval)
 
 if ld == 1:
   if ls == 1:
     printval = printval + " " + config['DISTRIB_DESCRIPTION']
   else:
-    print("Description:   ", config['DISTRIB_DESCRIPTION'])
+    lprintval = "Description:\t" + config['DISTRIB_DESCRIPTION']
+    print(lprintval)
 
 if lr == 1:
   if ls == 1:
     printval = printval + " " + config['DISTRIB_RELEASE']
   else:
-    print("Release:       ", config['DISTRIB_RELEASE'])
+    lprintval = "Release:\t" + config['DISTRIB_RELEASE']
+    print(lprintval)
 
 if lc == 1:
   if ls == 1:
     printval = printval + " " + config['DISTRIB_CODENAME']
   else:
-    print("Codename:      ", config['DISTRIB_CODENAME'])
+    lprintval = "Codename:\t" + config['DISTRIB_CODENAME']
+    print(lprintval)
 
 if ls == 1:
   print(printval.strip(" "))
