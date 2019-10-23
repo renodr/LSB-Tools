@@ -58,7 +58,7 @@ class OSInstall(install):
         rilr = sitepkgdir + "/lsbtools" + "/lsb_release.py"
         dlr = bindir + "/lsb_release"
         dtlr = dlr + '.temp'
-        ili = pkgdir + "lsbinstall.py"
+        ili = pkgdir + "/lsbinstall.py"
         rili = sitepkgdir + "/lsbtools" + "/lsbinstall.py"
         dli = bindir + "/lsbinstall.py"
         dtli = dli + '.temp'
