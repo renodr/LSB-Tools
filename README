@@ -12,7 +12,7 @@ following utilities:
 /usr/lib/lsb/remove_initd:  a tool to deactivate system init scripts installed
                             into the /etc/rc.d/init.d direcorty.
 
-/usr/bin/lsb_releae:        a tool to determine distribution information and
+/usr/bin/lsb_release:        a tool to determine distribution information and
                             available LSB modules
 
 
