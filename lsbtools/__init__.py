@@ -138,7 +138,7 @@ def get_matrix(initdDir, debug):
   return matrix
 
 def get_prog_ver(strprogram):
-  progver = strprogram + " " + " (LSB-Tools-0.6)"
+  progver = strprogram + " " + " (LSB-Tools-0.7)"
   return progver
 
 def install_font(argobject):
