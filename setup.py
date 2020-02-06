@@ -7,6 +7,7 @@ from setuptools import setup
 from setuptools.command.install import install
 import os, re, shutil, site
 
+distversion = '0.6'
 
 class OSInstall(install):
     """Allow OS installation"""
@@ -30,8 +31,7 @@ class OSInstall(install):
         install.run(self)
         lsbdir = rootdir + "/usr/lib/lsb"
         bindir = rootdir + "/usr/bin"
-        man1dir = rootdir + "/usr/share/man/man1"
-        man8dir = rootdir + "/usr/share/man/man8"
+        sbindir = rootdir + "/usr/sbin"
         sitepkgdir = site.getsitepackages()[0]
         pkgdir = rootdir + sitepkgdir + "/lsbtools"
         if not os.path.exists(lsbdir):
@@ -40,20 +40,21 @@ class OSInstall(install):
         if not os.path.exists(bindir):
             print("Creating: ", bindir)
             os.makedirs(bindir)
-        if not os.path.exists(man1dir):
-            print("Creating: ", man1dir)
-            os.makedirs(man1dir)
-        if not os.path.exists(man8dir):
-            print("Creating: ", man8dir)
-            os.makedirs(man8dir)
+        if not os.path.exists(sbindir):
+            print("Creating: ", sbindir)
+            os.makedirs(sbindir)
         iid = pkgdir + "/install_initd.py"
         riid = sitepkgdir + "/lsbtools" + "/install_initd.py"
         did = lsbdir + "/install_initd"
         dtid = did + '.temp'
+        sdid = sbindir + "/install_initd"
+        sdtid = sdid + '.temp'
         ird = pkgdir + "/remove_initd.py"
         rird = sitepkgdir + "/lsbtools" + "/remove_initd.py"
         drd = lsbdir + "/remove_initd"
         dtrd = drd + '.temp'
+        sdrd = sbindir + "/remove_intid"
+        sdtrd = sdrd + '.temp'
         ilr = pkgdir + "/lsb_release.py"
         rilr = sitepkgdir + "/lsbtools" + "/lsb_release.py"
         dlr = bindir + "/lsb_release"
@@ -75,12 +76,13 @@ class OSInstall(install):
         with open(ili, 'w') as modified: modified.write(myshebang + "\n" + data)
         os.symlink(riid, dtid)
         os.rename(dtid, did)
+        os.symlink(riid, sdtid)
+        os.rename(sdtid, sdid)
         os.symlink(rird, dtrd)
         os.rename(dtrd, drd)
+        os.symlink(rird, sdtrd)
+        os.rename(sdtrd, sdrd)
         os.symlink(rilr, dtlr)
-        shutil.copy2("man/lsb_release.1", man1dir)
-        shutil.copy2("man/install_initd.8", man8dir)
-        shutil.copy2("man/remove_initd.8", man8dir)
         os.rename(dtlr, dlr)
         os.chmod(iid, 0o755)
         os.chmod(ird, 0o755)
@@ -91,7 +93,7 @@ setup(
         'install': OSInstall,
     },
     name='LSB-Tools',
-    version='0.5',
+    version=distversion,
     packages=['lsbtools',],
     license='MIT',
     author='DJ Lucas',
@@ -101,9 +103,9 @@ setup(
     long_description=open('README').read(),
     python_requires='>3.7',
     platforms=['linux'],
-    data_files = [('', ['LICENSE']),
-                  ('', ['INSTALL']),
-                  ('', ['man/lsb_release.1']),
-                  ('', ['man/install_initd.8']),
-                  ('', ['man/remove_initd.8']),]
+    data_files = [('/usr/share/doc/LSB-Tools-' + distversion, ['LICENSE']),
+                  ('/usr/share/doc/LSB-Tools-' + distversion, ['INSTALL']),
+                  ('/usr/share/man/man1', ['man/lsb_release.1']),
+                  ('/usr/share/man/man8', ['man/install_initd.8']),
+                  ('/usr/share/man/man8', ['man/remove_initd.8']),]
 )
