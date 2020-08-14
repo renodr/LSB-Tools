@@ -53,7 +53,7 @@ class OSInstall(install):
         rird = sitepkgdir + "/lsbtools" + "/remove_initd.py"
         drd = lsbdir + "/remove_initd"
         dtrd = drd + '.temp'
-        sdrd = sbindir + "/remove_intid"
+        sdrd = sbindir + "/remove_initd"
         sdtrd = sdrd + '.temp'
         ilr = pkgdir + "/lsb_release.py"
         rilr = sitepkgdir + "/lsbtools" + "/lsb_release.py"
