@@ -1,4 +1,4 @@
-# Begin /usr/lib/lsb/install_initd
+# Begin /usr/lib/lsb/remove_initd
 
 import sys
 if sys.version_info < (3, 7):
