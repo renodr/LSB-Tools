@@ -46,7 +46,7 @@ args = parser.parse_args()
 if args.progver:
   strver = lsbtools.get_prog_ver(sys.argv[0])
   print(strver, "\n")
-  print("Copyright (C) 2019 DJ Lucas")
+  print("Copyright (C) 2020 DJ Lucas")
   print("This is free software; see the source for copying conditions.  There is NO")
   print("warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.")
   print("\nWritten by DJ Lucas.\n")
