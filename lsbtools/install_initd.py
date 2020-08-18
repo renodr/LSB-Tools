@@ -45,7 +45,7 @@ args = parser.parse_args()
 if args.progver:
   strver = lsbtools.get_prog_ver(sys.argv[0])
   print(strver, "\n")
-  print("Copyright (C) 2019 DJ Lucas")
+  print("Copyright (C) 2020 DJ Lucas")
   print("This is free software; see the source for copying conditions.  There is NO")
   print("warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.")
   print("\nWritten by DJ Lucas.\n")
@@ -151,10 +151,17 @@ for runlevel in {0,1,2,3,4,5,6}:
   stopdict[str(runlevel)] = sprld
 
 # Order sysinit
+maxiters = ( len(slist) * len(slist) )
+loop = 0
+iters = 0
 nomoves = 0
 if debug == 1:
   print("Organizing sysinit start scripts...")
 while nomoves == 0:
+  iters += 1
+  if iters == maxiters:
+    # We have a an endless loop
+    loop = 1
   nomoves = 0
   index = 0
   moves = 0
@@ -177,6 +184,14 @@ while nomoves == 0:
         newindex = tempindex
       indexsub += 1
     if newindex != curindex:
+      if loop == 1:
+        # Wait to bail out here with a usable error message
+        print("Reciprocal dependency detected between", startlist[str(runlevel)][index], "and",  startdict[str(runlevel)][newindex][hindex["name"]], "scripts!", file=sys.stderr)
+        if debug == 0:
+          print("Run with '-v' parameter to see the full list of afected scripts.\n", file=sys.stderr)
+        else:
+          print("", file=sys.stderr)
+        sys.exit(3)
       # Remove it and then put it back in proper order
       if debug == 1:
         print("Moving", slist[index], "to after", sysinit[newindex][hindex["name"]])
@@ -189,10 +204,17 @@ while nomoves == 0:
 
 # Reorder start lists (only for RLs 1-5) exactly like above
 for runlevel in {1,2,3,4,5}:
+  maxiters = ( len(startlist[str(runlevel)]) * len(startlist[str(runlevel)]) )
+  loop = 0
+  iters = 0
   nomoves = 0
   if debug == 1:
     print("Organizing runlevel", str(runlevel), "start scripts...")
   while nomoves == 0:
+    iters += 1
+    if iters == maxiters:
+      # We have a an endless loop
+      loop = 1
     nomoves = 0
     index = 0
     moves = 0
@@ -222,6 +244,14 @@ for runlevel in {1,2,3,4,5}:
           newindex = tempindex
         indexsub += 1
       if newindex != curindex and newindex != 1000:
+        if loop == 1:
+          # Wait to bail out here with a usable error message
+          print("Reciprocal dependency detected between", startlist[str(runlevel)][index], "and",  startdict[str(runlevel)][newindex][hindex["name"]], "scripts!", file=sys.stderr)
+          if debug == 0:
+            print("Run with '-v' parameter to see the full list of afected scripts.\n", file=sys.stderr)
+          else:
+            print("", file=sys.stderr)
+          sys.exit(3)
         # Remove it and then put it back in proper order
         if debug == 1:
           print("Moving", startlist[str(runlevel)][index], "to after", startdict[str(runlevel)][newindex][hindex["name"]])
