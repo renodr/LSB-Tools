@@ -168,7 +168,6 @@ def install_font(argobject):
       os.chmod(fontfile, 0o644)
       sys.exit(0)
 
-
 def install_init(argobject):
   initdDir = lsbtools.find_initd_dir()
   aobject = os.path.basename(argsobject).strip(" ")
@@ -196,7 +195,6 @@ def install_init(argobject):
       os.chmod(initfile, 0o644)
       sys.exit(0)
 
-
 def install_profile(argobject):
   profileDir = "/etc/profile.d"
   aobject = os.path.basename(argsobject).strip(" ")
@@ -223,7 +221,6 @@ def install_profile(argobject):
       copyfile(argsobject, profileDir)
       os.chmod(profilefile, 0o644)
       sys.exit(0)
-
 
 def install_service(argobject):
   portproto = argobject[0].split("/")
@@ -276,4 +273,27 @@ def install_service(argobject):
     print("Service", portservice, "with port", portproto[0], "on protocol", portproto[1], "exists.")
     sys.exit(0)
 
+def install_inet(argsobject):
+  print("Not implemented...")
+  sys.exit(0)
+
+def install_crontab(argsobject):
+  print("Not implemented..."
+  sys.exit(0)
+
+def install_package(argsobject):
+  print("Not implemented...")
+  sys.exit(0)
+
+def install_menu(argsobject):
+  print("Not implemente...")
+  sys.exit(0)
+
+def install_ldconfig(argsobject):
+  print("Not implemente...")
+  sys.exit(0)
+
+def install_man(argsobject):
+  print("Not implemente...")
+  sys.exit(0)
 
