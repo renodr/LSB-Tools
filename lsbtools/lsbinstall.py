@@ -103,7 +103,7 @@ elif args.type == "service":
     print("Error, too few agurments for type 'service'! Exiting...")
     sys.exit(1)
   else:
-    inst_service(args.object)
+    lsbtools.install_service(args.object)
 elif args.type == "inet":
   objecttype = "inet"
 elif args.type == "crontab":
