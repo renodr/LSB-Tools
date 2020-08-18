@@ -43,6 +43,7 @@ class OSInstall(install):
         if not os.path.exists(sbindir):
             print("Creating: ", sbindir)
             os.makedirs(sbindir)
+        ipy = pkgdir + "/__init__.py"
         iid = pkgdir + "/install_initd.py"
         riid = sitepkgdir + "/lsbtools" + "/install_initd.py"
         did = lsbdir + "/install_initd"
@@ -66,6 +67,8 @@ class OSInstall(install):
         # setuptools depends on lsb_release
         # hardcode the interpreter for Python upgrades
         myshebang = "#!" + os.path.dirname(sys.executable) + "/" + os.readlink(sys.executable)
+        with open(ipy, 'r') as original: data = original.read()
+        with open(ipy, 'w') as modified: modified.write(myshebang + "\n" + data)
         with open(iid, 'r') as original: data = original.read()
         with open(iid, 'w') as modified: modified.write(myshebang + "\n" + data)
         with open(ird, 'r') as original: data = original.read()

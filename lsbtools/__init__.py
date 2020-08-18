@@ -1,5 +1,4 @@
-#!/usr/bin/env python3
-# Begin lsbinitd.py
+# Begin lsbtools/__init__.py
 
 import glob, itertools, os, re, sys
 from io import StringIO

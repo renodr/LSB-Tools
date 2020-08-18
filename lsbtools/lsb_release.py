@@ -1,4 +1,3 @@
-#!/usr/bin/python3.7
 # Begin /usr/bin/lsb_release
 
 import sys
