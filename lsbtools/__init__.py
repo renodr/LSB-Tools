@@ -277,7 +277,7 @@ def install_inet(argsobject):
   sys.exit(0)
 
 def install_crontab(argsobject):
-  print("Not implemented..."
+  print("Not implemented...")
   sys.exit(0)
 
 def install_package(argsobject):
