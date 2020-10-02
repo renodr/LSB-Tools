@@ -323,7 +323,10 @@ for s in sysinit:
       print("Removing", glob.glob(spath)[0])
     if dryrun == 0:
       os.remove(glob.glob(spath)[0])
-increment = 100 // len(sysinit)
+if len(sysinit) > 0:
+  increment = 100 // len(sysinit)
+else:
+  increment = 99
 sid = 0
 for s in sysinit:
   sname = s[hindex["name"]]
