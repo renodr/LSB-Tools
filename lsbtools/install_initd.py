@@ -56,6 +56,10 @@ if not os.path.exists(args.initfile):
 else:
   initfile = args.initfile
 
+if not os.path.exists(initfile):
+  print("Error! Initfile", initfile, "does not exist. Exiting...", file=sys.stderr)
+  sys.exit(1)
+
 if args.verbose:
   debug = 1
 else:
