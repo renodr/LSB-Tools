@@ -7,7 +7,7 @@ from setuptools import setup
 from setuptools.command.install import install
 import os, re, shutil, site
 
-distversion = '0.7'
+distversion = '0.8'
 
 class OSInstall(install):
     """Allow OS installation"""
