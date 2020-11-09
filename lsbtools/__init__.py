@@ -93,7 +93,7 @@ def find_initd_dir():
       initdDir = os.path.realpath("/etc/init.d")
     else:
       initdDir = "/etc/init.d"
-  elif os.path.exists("/etc/rc.d./init.d"):
+  elif os.path.exists("/etc/rc.d/init.d"):
     initdDir = "/etc/rc.d/init.d"
   else:
     print("Unable to locate init.d directory! Exiting...", file=sys.stderr)
