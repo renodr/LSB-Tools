@@ -334,7 +334,7 @@ for s in sysinit:
   gname = "S" + strsid + sname
   spath = os.path.join(rldir, gname)
   if debug == 1 or dryrun == 1:
-    print("Adding", spath)
+    print("Adding", spath, "->", target)
   if dryrun == 0:
     os.symlink(target, spath)
   sid += increment
@@ -367,7 +367,7 @@ for runlevel in {0,1,2,3,4,5,6}:
     gname = "S" + strsid + sname
     spath = os.path.join(rldir, gname)
     if debug == 1 or dryrun == 1:
-      print("Adding", spath)
+      print("Adding", spath, "->", target)
     if dryrun == 0:
       os.symlink(target, spath)
     sid += increment
@@ -395,7 +395,7 @@ for runlevel in {0,1,2,3,4,5,6}:
     spath = os.path.join(rldir, gname)
     target = os.path.join("../init.d", sname)
     if debug == 1 or dryrun == 1:
-      print("Adding", spath)
+      print("Adding", spath, "->", target)
     if dryrun == 0:
       os.symlink(target, spath)
     sid += increment
