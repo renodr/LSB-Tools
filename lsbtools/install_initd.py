@@ -326,13 +326,13 @@ else:
 sid = 0
 for s in sysinit:
   sname = s[hindex["name"]]
-  target = os.path.join("../init.d", sname)
+  target = os.path.join(rldir, sname)
   if sid < 10:
     strsid = "0" + str(sid)
   else:
     strsid = str(sid)
   gname = "S" + strsid + sname
-  spath = os.path.join(rldir, gname)
+  spath = os.path.join(os.path.relpath(initdDir, rldir), gname)
   if debug == 1 or dryrun == 1:
     print("Adding", spath, "->", target)
   if dryrun == 0:
@@ -359,7 +359,7 @@ for runlevel in {0,1,2,3,4,5,6}:
   sid = 0
   for s in startdict[str(runlevel)]:
     sname = s[hindex["name"]]
-    target = os.path.join("../init.d", sname)
+    target = os.path.join(os.path.relpath(initdDir, rldir), sname)
     if sid < 10:
       strsid = "0" + str(sid)
     else:
@@ -393,7 +393,7 @@ for runlevel in {0,1,2,3,4,5,6}:
       strsid = str(sid)
     gname = "K" + strsid + sname
     spath = os.path.join(rldir, gname)
-    target = os.path.join("../init.d", sname)
+    target = os.path.join(os.path.relpath(initdDir, rldir), sname)
     if debug == 1 or dryrun == 1:
       print("Adding", spath, "->", target)
     if dryrun == 0:
