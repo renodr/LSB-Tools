@@ -4,7 +4,7 @@ To install as a system utility, as the root user, simply run:
 To create a packaged directory, run as your packaging user with the '--root'
 argument.
 
-As this is a noarch system utiltity, the seutp.py install agurments --home,
+As this is a noarch system utiltity, the setup.py install arguments --home,
 --install-base, --install-data, --install-purelib, --install-platlib,
 --install-scripts, and --prefix are explicitly disallowed.
 
