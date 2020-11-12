@@ -4,7 +4,7 @@ import glob, itertools, os, re, sys
 from io import StringIO
 
 # Treat LSB headers just like RFC 2822 (email headers)
-# Derived from RFC822Parser from Debain initduitls.py
+# Derived from RFC822Parser from Debain initdutils.py
 class ParseHeaders(dict):
   "A dictionary-like object."
   __linere = re.compile(r'([^:]+):\s*(.*)$')
@@ -39,7 +39,7 @@ class ParseHeaders(dict):
 beginre = re.compile(re.escape('### BEGIN INIT INFO'))
 endre = re.compile(re.escape('### END INIT INFO'))
 
-# Derrived from scan_intifile() from Debian initdutils.py
+# Derived from scan_intifile() from Debian initdutils.py
 def scan_headers(initfile, debug):
   headerlines = ''
   scanning = False
@@ -285,14 +285,14 @@ def install_package(argsobject):
   sys.exit(0)
 
 def install_menu(argsobject):
-  print("Not implemente...")
+  print("Not implemented...")
   sys.exit(0)
 
 def install_ldconfig(argsobject):
-  print("Not implemente...")
+  print("Not implemented...")
   sys.exit(0)
 
 def install_man(argsobject):
-  print("Not implemente...")
+  print("Not implemented...")
   sys.exit(0)
 
