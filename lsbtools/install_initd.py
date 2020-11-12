@@ -184,7 +184,7 @@ while nomoves == 0:
         # Wait to bail out here with a usable error message
         print("Reciprocal dependency detected between", startlist[str(runlevel)][index], "and",  startdict[str(runlevel)][newindex][hindex["name"]], "scripts!", file=sys.stderr)
         if debug == 0:
-          print("Run with '-v' parameter to see the full list of afected scripts.\n", file=sys.stderr)
+          print("Run with the '-v' parameter to see the full list of afected scripts.\n", file=sys.stderr)
         else:
           print("", file=sys.stderr)
         sys.exit(3)
@@ -228,7 +228,7 @@ for runlevel in {1,2,3,4,5}:
               # It's in sysinit, so just ignore it.
               slerror = 0
           if slerror == 1:
-            print("Error! Unable to locate Requried-Start dependency", startdict[str(runlevel)][curindex][hindex["required-start"]][indexsub], "for script:", startlist[str(runlevel)][index], file=sys.stderr)
+            print("Error! Unable to locate Required-Start dependency", startdict[str(runlevel)][curindex][hindex["required-start"]][indexsub], "for script:", startlist[str(runlevel)][index], file=sys.stderr)
             sys.exit(2)
         if tempindex > newindex and tempindex != 1000:
           newindex = tempindex
@@ -244,7 +244,7 @@ for runlevel in {1,2,3,4,5}:
           # Wait to bail out here with a usable error message
           print("Reciprocal dependency detected between", startlist[str(runlevel)][index], "and",  startdict[str(runlevel)][newindex][hindex["name"]], "scripts!", file=sys.stderr)
           if debug == 0:
-            print("Run with '-v' parameter to see the full list of afected scripts.\n", file=sys.stderr)
+            print("Run with the '-v' parameter to see the full list of affected scripts.\n", file=sys.stderr)
           else:
             print("", file=sys.stderr)
           sys.exit(3)
@@ -286,7 +286,7 @@ for runlevel in {0,1,2,3,4,5,6}:
               # It's in sysinit or started in current runnlevel, so just ignore
               slerror = 0
           if slerror == 1:
-            print("Error! Unable to locate Requried-Stop dependency", stopdict[str(runlevel)][curindex][hindex["required-stop"]][indexsub], "for script:", stoplist[str(runlevel)][index], file=sys.stderr)
+            print("Error! Unable to locate Required-Stop dependency", stopdict[str(runlevel)][curindex][hindex["required-stop"]][indexsub], "for script:", stoplist[str(runlevel)][index], file=sys.stderr)
             sys.exit(2)
         if tempindex < newindex and tempindex != 1000:
           newindex = tempindex
