@@ -6,7 +6,7 @@
 A distribution agnostic set of utilites for LSB compliance that includes the
 following utilities:
 
-/usr/lib/lsb/install_initd: a tool to activate systyem init scripts installed
+/usr/lib/lsb/install_initd: a tool to activate system init scripts installed
                             into the /etc/rc.d/init.d directory.
 
 /usr/lib/lsb/remove_initd:  a tool to deactivate system init scripts installed
