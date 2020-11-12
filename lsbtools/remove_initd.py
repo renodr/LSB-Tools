@@ -10,7 +10,7 @@ from io import StringIO
 
 # Dictionary to map facilities to script names
 facilities = {
-  # special case for "$firs" and "$last" so that it's always first/last
+  # special case for "$first" and "$last" so that it's always first/last
   # This is exclusively for *dm scripts and reboot/halt
   "$last"      : "98",
   "$first"     : "01",
@@ -70,7 +70,7 @@ if args.dryrun:
 else:
   dryrun = 0
 
-# Now, pull in all scripts and depdendencies in initdDir into lists
+# Now, pull in all scripts and dependencies in initdDir into lists
 matrix = lsbtools.get_matrix(initdDir, debug)
 
 # Update facilites -> script names
@@ -89,7 +89,7 @@ for s in matrix:
         s[x][i] = s[x][i].replace(key, facilities[key])
 
 # Find what runlevels initfile is set to start and stop in
-# First make sure it's installed adn then enabled
+# First make sure it's installed and then enabled
 if not os.path.exists(initfile):
   print("Error!", initfile, "does not exist! Exiting...", file=sys.stderr)
   sys.exit(1)
@@ -100,7 +100,7 @@ stlvls = matrix[tindex][hindex["start-runlevels"]]
 splvls = matrix[tindex][hindex["stop-runlevels"]]
 
 # Review all enabled scripts in those runlevels for Required-St{art,op} and
-# report error and exit if any
+# report any errors and exit if there are any errors
 stlist = []
 splist = []
 index = 0
@@ -133,7 +133,7 @@ while index < len(matrix):
 
 if len(stlist) > 0:
   printstr = os.path.basename(initfile) + ":"
-  print("Requried-Start dependencies exist for", printstr, file=sys.stderr)
+  print("Required-Start dependencies exist for", printstr, file=sys.stderr)
   for s in stlist:
     print(s)
   errorstr = os.path.basename(initfile) + "."
@@ -142,7 +142,7 @@ if len(stlist) > 0:
 
 if len(splist) > 0:
   printstr = os.path.basename(initfile) + ":"
-  print("Requried-Stop dependencies exist for", printstr, file=sys.stderr)
+  print("Required-Stop dependencies exist for", printstr, file=sys.stderr)
   for s in splist:
     print(s)
   errorstr = os.path.basename(initfile) + "."
