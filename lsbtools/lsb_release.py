@@ -80,7 +80,7 @@ if lv == 0 and li == 0 and ld == 0 and lr == 0 and lc == 0:
 
 # Read required configuration file
 if not os.path.exists("/etc/lsb-release"):
-  print("Required configuration file '/etc/lsb-relase' is not found. Exiting...", file=sys.stderr)
+  print("Required configuration file '/etc/lsb-release' is not found. Exiting...", file=sys.stderr)
   sys.exit(1)
 
 conffile = open("/etc/lsb-release", 'r')
