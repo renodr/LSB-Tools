@@ -44,7 +44,7 @@ parser = argparse.ArgumentParser(
                           the system service database
                           Services are represetned as:
                               port/proto name [alias1...]
-           inet           Add an entry to the systems network super daemon
+           inet           Add an entry to the system's network super daemon
                           configuration
                           inet service files will have the format:
                               service <service_name>
@@ -82,25 +82,25 @@ if args.type != "service" and args.type != "ldconfig":
 
 if args.type == "font":
   if len(args.object) > 1:
-    print("Error, too many agurments for type 'font'! Exiting...")
+    print("Error, too many arguments for type 'font'! Exiting...")
     sys.exit(1)
   else:
     lsbtools.install_font(args.object[0])
 elif args.type == "init":
   if len(args.object) > 1:
-    print("Error, too many agurments for type 'init'! Exiting...")
+    print("Error, too many arguments for type 'init'! Exiting...")
     sys.exit(1)
   else:
     lsbtools.install_init(args.object[0])
 elif args.type == "profile":
   if len(args.object) > 1:
-    print("Error, too many agurments for type 'profile'! Exiting...")
+    print("Error, too many arguments for type 'profile'! Exiting...")
     sys.exit(1)
   else:
     lsbtools.install_profile(args.object[0])
 elif args.type == "service":
   if len(args.object) < 2:
-    print("Error, too few agurments for type 'service'! Exiting...")
+    print("Error, too few arguments for type 'service'! Exiting...")
     sys.exit(1)
   else:
     lsbtools.install_service(args.object)
